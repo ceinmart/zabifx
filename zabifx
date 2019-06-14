@@ -1,0 +1,206 @@
+#! /usr/bin/sh
+
+# SVN-ID $Id: zabifx 89197 2013-08-05 18:36:13Z cinacio $
+
+#
+# 23/April/2013
+#   by Cesar Inacio Martins - cesar.inacio.martins@gmail.com
+#
+# Script to help collect information from Informix database
+# to Zabbix Server 2.0
+#
+# The reason to use this script is because the Zabbix Server 2.0 doesn't
+# support SNMP keys with multiple values (not allow discovery sessions inside
+# of discovery instance).
+# At Zabbix 2.2 this should be supported , so, further this information maybe
+# can be collected with SNMP.
+# (aggregating the User Sessions IODs, Logical logs IODs)
+#
+# This script was prepared to be used with Zabbix Agent , just include into
+# /etc/zabbix/zabbix-agentd.conf the line :
+#    UserParameter=zabifx[*],/etc/zabbix/zabifx $1 $2
+# Then at Zabbix server, configure a zabbix item with keys :
+#  | serverstatus sessioncount activesessioncount topsessioncount llogcurrent
+#  | logwithoutbkp llogwithoutbkpperc rssservers rssbacklog rssconnactive
+#  | version uptime
+#  Eg.: zabifx[serverstatus,{#SNMPVALUE}]
+#
+# Observation: The {#SNMPVALUE} is a zabbix macro where is replaced by instance
+#              name discovered and is useful only inside of the template
+#              'Template - Informix' working with informix SNMP service.
+#              The template is available on
+#              www....
+
+# Set your Informix variables here
+.  /etc/zabbix/env.ifx.sh
+
+
+ONSTAT=$INFORMIXDIR/bin/onstat
+GREP=grep
+export POSIXLY_CORRECT=1 # to AWK parse equal on all OS the regular expressions... (on Linux this can be disabled)
+AWK=awk
+SED=sed
+TR=tr
+CUT=cut
+DATE=date
+# This is for AIX, where it is part of the RPM coreutils installed manually.
+[ -x /usr/linux/bin/date ] && DATE=/usr/linux/bin/date
+
+
+# Use a temporary file (just in case resquested all parameters together, run only once each onstat)
+  vTmp=/tmp/zabifx.$$
+  vTmp1=$vTmp.1
+# Remove the temporary file when the script finish, with or without success.
+  trap "rm -f $vTmp.* >/dev/null 2>&1 ; exit " 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+
+# Expected receive 2 parameters
+# Example :  zabifx sessioncount ifxonline
+# Example, just for test if the scripts is working:  zabifx all <instance_name>
+if [ $# -ne 2 ] ; then
+  echo "ZBX_NOTSUPPORTED"
+  exit 1
+fi
+
+export vOption=$1
+export INFORMIXSERVER=$2
+
+# Check if onstat is accessible
+if [ ! -x $ONSTAT ] ; then
+  echo "ZBX_NOTSUPPORTED"
+  exit 1
+fi
+
+##############################################
+###
+export vOnstatStatus=""
+$ONSTAT -  > $vTmp1.onstat-
+vOnstatStatus=$? # 5 = online
+
+##############################################
+###
+# function to capture the onstat outputs
+# (useful only when used the "all" cmdline parameter, avoiding run multiple times the same onstat )
+_onstat(){
+  if [ $vOnstatStatus -eq 5 ] ; then
+    vParam=$(echo "$*" | $TR -d " " )
+    [ ! -f $vTmp1.onstat.$vParam ] && $ONSTAT $*   > $vTmp1.onstat.$vParam 2>/dev/null
+    cat $vTmp1.onstat.$vParam
+  fi
+}
+
+##############################################
+###
+_param() {
+[ "$1" != "serverstatus" -a "$vOnstatStatus" != 5 ] && echo "$1|ZBX_NOTSUPPORTED" && return
+case $1 in
+  # Return Server Status , # 0   Initialization mode
+                           # 1   Quiescent mode
+                           # 2   Recovery mode
+                           # 3   Backup mode
+                           # 4   Shutdown mode
+                           # 5   Online mode
+                           # 6   Abort mode
+                           # 7   User mode
+                           # 255     Off-Line mode
+  serverstatus) echo "$1|$vOnstatStatus"  ;;
+
+  # Return # of users sessions connected
+  sessioncount) printf "$1|" ;
+             _onstat "-g ntu" | \
+               $AWK '/#netscb/ { vNext=1 ; next } vNext == 1 { match($1,".*/"); x=substr($1,RSTART, RLENGTH-1); print x; exit} '
+             ;;
+  # Return # max of users sessions connected since the database started (or last onstat -z)
+  topsessioncount) printf "$1|" ;
+             _onstat "-g ntu" | \
+               $AWK '/#netscb/ { vNext=1 ; next } vNext == 1 { match($1,"/.*"); x=substr($1,RSTART+1, RLENGTH); print x; exit} '
+             ;;
+  # Return # read threads, waiting CPU to run
+  threadread) printf "$1|" ; 
+             _onstat "-g rea" | \
+               $GREP -c "ready"
+             ;;
+  # Return # active user threads , running on CPU
+  activesessioncount) printf "$1|" ;
+             _onstat "-g act" | \
+               $GREP -cE "aio|sqlexec"
+             ;;
+  # Return # user sessions waiting for something what isn't Yield, Lock (mutex or any other condition)
+  userwaiting) printf "$1|" ;
+             _onstat "-u"  | \
+               $AWK '$2 ~ /^[A-Z-]{7}$/ {print $2}' | $GREP -c "^[^YL-]"
+             ;;
+  # Return # user sessions waiting for lock
+  userlockwaiting) printf "$1|" ;
+             _onstat "-u"  | \
+               $AWK '$2 ~ /^[A-Z-]{7}$/ {print $2}' | $GREP -c "^L"
+             ;;
+  # Return current logical logs
+  llogcurrent) printf "$1|" ;
+             _onstat "-l" | \
+               $AWK  '$3 ~ /^[A-Z-]{7}$/ && /C/ {print $4}'
+             ;;
+   # Return # logical logs without backup
+  llogwithoutbkp) printf "$1|" ;
+             _onstat "-l" | \
+               $AWK '$3 ~ /^[A-Z-]{7}$/ {print $3}'  | $GREP -c '^U.-'
+             ;;
+  # Return % logical logs without backup
+  llogwithoutbkpperc) printf "$1|" ;
+             logstotal=$(_onstat "-l" | $AWK '/[0-9]+ active/ { print $1}')
+             logswb=$(_onstat "-l" | \
+               $AWK '$3 ~ /^[A-Z-]{7}$/ {print $3}'  | $GREP -c '^U.-')
+             echo $logswb $logstotal | $AWK ' {x= $1 * 100  / $2 ; print x} '
+             ;;
+  # Return the # of RSS servers configured
+  rssservers) printf "$1|" ;
+             _onstat "-g rss verbose" | $AWK '/Number of RSS servers/ { print $NF } '
+             ;;
+  # Return the # of active connection of all RSS servers configured
+  rssconnactive) printf "$1|" ;
+             _onstat "-g rss verbose" | $AWK -F: 'BEGIN {x=0} /Log transmission status/ { if ($NF ~ "Active") x=x+1 } END { print x } '
+             ;;
+  # Return the total of backlog (~ delay) of all RSS servers configured
+  rssbacklog) printf "$1|" ;
+             _onstat "-g rss verbose" | $AWK -F: 'BEGIN {x=0} /Approximate.*Backlog/ { x=x+$NF } END { print x}'
+             ;;
+   # Return text with version of the database
+  version) printf "$1|" ;
+            _onstat "-"  | \
+               $GREP "Version" | $AWK -F"--" '{print $1}'
+             ;;
+  # Return # seconds the database is UP.
+  # Requires the GNU date command , where support the @0 parameter
+  uptime) printf "$1|" ;
+           vUPstr=$(_onstat "-" | $GREP " Up " | $AWK -F"--" '{print $3}' )
+           vUPhour=$(echo "$vUPstr" | $SED -e 's/ *Up *//g'  -e 's/.*days *//g') # return HH:MM:SS
+           vUPhour=$(echo "$vUPhour" | $AWK -F: '{ printf " %s hour + %s minutes ",$1,$2} ')
+           vUPdays=""
+           if echo "$vUPstr" | $GREP -q "days" ; then
+             vUPdays=" + $(echo "$vUPstr" | $SED -e 's/ *Up *//g'  -e 's/ *days .*//g') days " # return DD
+           fi
+           vTimeStamp=$($DATE -d "1970-01-01 UTC $vUPdays + $vUPhour " +%s  2>&1 )
+           if [ $? -eq 0 ] ; then
+             echo "$vTimeStamp"
+           else
+             echo "ZBX_NOTSUPPORTED"
+             break
+           fi
+           ;;
+
+  *) echo "ZBX_NOTSUPPORTED"
+    ;;
+esac
+} ##### _param
+###
+##############################################
+
+if [ "$vOption" = "all" ] ; then
+  for x in serverstatus sessioncount activesessioncount topsessioncount llogcurrent llogwithoutbkp llogwithoutbkpperc rssservers rssbacklog rssconnactive version uptime threadread
+  do
+    _param $x
+  done
+else
+  _param $vOption | $CUT -f2 -d"|"
+fi
+
+
