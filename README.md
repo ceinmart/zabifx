@@ -1,6 +1,8 @@
-2019-06-14
+2019-06-14  
 by Cesar Inacio Martins - informix at imartins.com.br
+
 --------------------------------------------------------------
+
 Changelog 
  08/ago/2013 - Changed the template and zabifx scripts.
                added item to monitor # of threads ready (onstat -g rea) into the
