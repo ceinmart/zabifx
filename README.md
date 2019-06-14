@@ -3,18 +3,19 @@ by Cesar Inacio Martins - informix at imartins.com.br
 
 --------------------------------------------------------------
 
+```
 Changelog 
- 08/ago/2013 - Changed the template and zabifx scripts.
-               added item to monitor # of threads ready (onstat -g rea) into the
-			   template and zabifx
-			   Little change of priority on Sessions in wait trigger
- 20/jun/2013 - Correction on template, two items have wrong keys (Physical Log)
-               Added new trigger for sessions in waits (not lock wait)
- 18/jun/2013 - Correction on zabifx script, where miscalculate the uptime 
-               information when the engine is less 1 day up and miscalculate
-			   the minutes.
- 10/oct/2018 - Rewrite to work only with "onstat" , without SNMP service.
-  
+ 10/oct/2018 - Rewrite to work only with "onstat" , without SNMP service. 
+ 20/jun/2013 - Correction on template, two items have wrong keys (Physical Log) 
+               Added new trigger for sessions in waits (not lock wait) 
+ 18/jun/2013 - Correction on zabifx script, where miscalculate the uptime  
+               information when the engine is less 1 day up and miscalculate 
+               the minutes. 
+ 08/ago/2013 - Changed the template and zabifx scripts.   
+               added item to monitor # of threads ready (onstat -g rea) into the   
+               template and zabifx    
+               Little change of priority on Sessions in wait trigger   
+``` 
 
 Index
 - About this Template_Informix
