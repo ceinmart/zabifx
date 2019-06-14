@@ -1,7 +1,7 @@
 #! /usr/bin/bash
   
 #
-# 2018-10-10 - by Cesar Inacio Martins - cesar.inacio.martins@gmail.com
+# 2018-10-10 - by Cesar Inacio Martins - informix as imartins.com
 #  script rewrite 
 #  The Informix database version 12.10.FC10 doesn't support anymore the SNMP service.
 #  So, since then, this script should be used to monitor everything on Informix database. 
