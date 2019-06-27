@@ -22,7 +22,7 @@ Changelog
 
 Index
 - About this Template_Informix
-- Limitations / attention / caution:
+- How use this template?
 --------------------------------------------------------------
 About this Template_Informix
 
@@ -37,7 +37,7 @@ About this Template_Informix
     This template+script able to discovery all instances + dbspaces .
 
 --------------------------------------------------------------
-How use this Template?
+How use this template?
 
     * Configure the zabbix agent on server where your Informix engine is running
       (please, check the zabbix manual/wiki for this)
@@ -53,20 +53,20 @@ How use this Template?
       $ cd /etc/zabbix
       $ ln -s zabifx.git/zabifx.sh  zabifx.sh
       $ ln -s zabifx.git/env.ifx.sh env.ifx.sh 
-    * Link or create a shell script to allow set your Informix enviroment 
-      /etc/zabbix/env.ifx.sh or /home/informix/env.ifx.sh .
-    * Logged with zabbix user, test zabbix if the script is working :  
+    * Link or create a shell script to set your Informix enviroment 
+      /etc/zabbix/env.ifx.sh or /home/informix/env.ifx.sh 
+    * Logged with zabbix user, test if the script is working :  
       $ /etc/zabbix/zabifx.sh instances - 
       They should return something like :
         | {"data":[{ "{#IFXSERVER}":"ifxvserv1","{#IFXSERVERSTATUS}":"Up","{#IFXMSGPATH}":"/opt/informix/tmp/ifxserv1.log"}]}
     * Restart the zabbix agent.
       $ systemctl restart zabbix-agentd
-    * On Zabbix Server, with admin user, import the template :
+    * On Zabbix Server, with admin user, import the template:
       go to Configuration -> Templates -> Import (button, top right of screen)
-    * On Host configurations, locate your host, and link the template with it.
+    * On Host configurations, locate your host and link the template with it.
       You need to wait the discovery run (the default interval for this
-      template is 2 hours) or you can force selecting the discovery item and click to "check now" button. 
-      On "lastest data" page, should appear sessions like :
+      template is 2 hours) or you can force selecting the discovery item and click on "check now" button. 
+      On "lastest data" page of your zabbix server, should appear applications like :
 		| Informix Database (5 Items)
 		| Informix Database - cluster (3 Items)
 		| Informix Database - dbspaces (164 Items)
