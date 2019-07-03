@@ -560,7 +560,7 @@ _param() {
              ;;
     # Return the path of ONLINE.LOG 
     shmtotal) printf "${vParam1}|" ; 
-             eval "echo $(_onstat "-c" | $AWK '$1 == "SHMTOTAL" {print $2 ; exit }' )"
+             eval "echo $(_onstat "-c" | $AWK '$1 == "SHMTOTAL" {print $2*1024 ; exit }' )"
              ;;
      # Return the path of ONLINE.LOG 
     msgpath) printf "${vParam1}|" ; 
