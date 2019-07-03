@@ -549,7 +549,20 @@ _param() {
                echo "ZBX_NOTSUPPORTED"
              fi
              ;;
+    # Return total memory allocated
+    memtotaloc) printf "${vParam1}|" ; 
+             value=$( _onstat '-g seg' | awk '/^Total:/ { print $4}')
+             if [ ! -z "$value" ] ; then 
+               echo "$value"
+             else
+               echo "ZBX_NOTSUPPORTED"
+             fi
+             ;;
     # Return the path of ONLINE.LOG 
+    shmtotal) printf "${vParam1}|" ; 
+             eval "echo $(_onstat "-c" | $AWK '$1 == "SHMTOTAL" {print $2 ; exit }' )"
+             ;;
+     # Return the path of ONLINE.LOG 
     msgpath) printf "${vParam1}|" ; 
              eval "echo $(_onstat "-c" | $AWK '$1 == "MSGPATH" {print $2 ; exit }' )"
              ;;
@@ -595,7 +608,7 @@ _param() {
 ##############################################
 
 if [ "$vOption" = "all" ] ; then 
- for x in instance serverstatus sessioncount activesessioncount topsessioncount llogcurrent llogwithoutbkp llogwithoutbkpperc physize rssservers rssbacklog rssconnactive version checkpoint_inprogress checkpoints checkpoint_waits deadlocks lruwrites fgwrites uptime threadread llogautobkp systemthreads totalthreads vps vp_cpu vp_aio vp_lio vp_pio vp_adm vp_soc vp_msc vp_ssl vp_fifo vp_enc vp_idsxmlvp vp_bts memvirfree memresfree memextfree membuffree memtotfree memvirused memresused memextused membufused memtotused msgpath network_accepted network_rejected network_reads network_writes buffer_waits buffer_flushes latches_waits
+ for x in instance serverstatus sessioncount activesessioncount topsessioncount llogcurrent llogwithoutbkp llogwithoutbkpperc physize rssservers rssbacklog rssconnactive version checkpoint_inprogress checkpoints checkpoint_waits deadlocks lruwrites fgwrites uptime threadread llogautobkp systemthreads totalthreads vps vp_cpu vp_aio vp_lio vp_pio vp_adm vp_soc vp_msc vp_ssl vp_fifo vp_enc vp_idsxmlvp vp_bts memvirfree memresfree memextfree membuffree memtotfree memvirused memresused memextused membufused memtotused memtotaloc shmtotal msgpath network_accepted network_rejected network_reads network_writes buffer_waits buffer_flushes latches_waits
   do 
     _param $x $vOptionParam
   done 

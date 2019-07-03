@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.2</version>
-    <date>2019-06-14T13:48:28Z</date>
+    <date>2019-07-03T19:16:59Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -2181,6 +2181,67 @@ Executed by Zabbix Agent  &#13;
                             <master_item/>
                         </item_prototype>
                         <item_prototype>
+                            <name>Informix DB {#IFXSERVER} - Memory Allocated</name>
+                            <type>0</type>
+                            <snmp_community/>
+                            <snmp_oid/>
+                            <key>zabifx[memtotaloc,{#IFXSERVER}]</key>
+                            <delay>3m</delay>
+                            <history>4d</history>
+                            <trends>365d</trends>
+                            <status>0</status>
+                            <value_type>0</value_type>
+                            <allowed_hosts/>
+                            <units>B</units>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description>Total of memory allocated in the O.S.&#13;
+(summary of onstat -g seg)</description>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>Informix Database - Memory</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                            <logtimefmt/>
+                            <preprocessing/>
+                            <jmx_endpoint/>
+                            <timeout>3s</timeout>
+                            <url/>
+                            <query_fields/>
+                            <posts/>
+                            <status_codes>200</status_codes>
+                            <follow_redirects>1</follow_redirects>
+                            <post_type>0</post_type>
+                            <http_proxy/>
+                            <headers/>
+                            <retrieve_mode>0</retrieve_mode>
+                            <request_method>0</request_method>
+                            <output_format>0</output_format>
+                            <allow_traps>0</allow_traps>
+                            <ssl_cert_file/>
+                            <ssl_key_file/>
+                            <ssl_key_password/>
+                            <verify_peer>0</verify_peer>
+                            <verify_host>0</verify_host>
+                            <application_prototypes/>
+                            <master_item/>
+                        </item_prototype>
+                        <item_prototype>
                             <name>Informix DB {#IFXSERVER} - Memory Free Total</name>
                             <type>0</type>
                             <snmp_community/>
@@ -3190,6 +3251,66 @@ Executed by Zabbix Agent  &#13;
                             <headers/>
                             <retrieve_mode>0</retrieve_mode>
                             <request_method>1</request_method>
+                            <output_format>0</output_format>
+                            <allow_traps>0</allow_traps>
+                            <ssl_cert_file/>
+                            <ssl_key_file/>
+                            <ssl_key_password/>
+                            <verify_peer>0</verify_peer>
+                            <verify_host>0</verify_host>
+                            <application_prototypes/>
+                            <master_item/>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Informix DB  {#IFXSERVER} - Shared Memory allowed - SHMTOTAL configuration</name>
+                            <type>0</type>
+                            <snmp_community/>
+                            <snmp_oid/>
+                            <key>zabifx[shmtotal,{#IFXSERVER}]</key>
+                            <delay>6h</delay>
+                            <history>30d</history>
+                            <trends>365d</trends>
+                            <status>0</status>
+                            <value_type>3</value_type>
+                            <allowed_hosts/>
+                            <units>B</units>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description>The maximum amount of shared memory allowed for the server.</description>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>Informix Database - Memory</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                            <logtimefmt/>
+                            <preprocessing/>
+                            <jmx_endpoint/>
+                            <timeout>3s</timeout>
+                            <url/>
+                            <query_fields/>
+                            <posts/>
+                            <status_codes>200</status_codes>
+                            <follow_redirects>1</follow_redirects>
+                            <post_type>0</post_type>
+                            <http_proxy/>
+                            <headers/>
+                            <retrieve_mode>0</retrieve_mode>
+                            <request_method>0</request_method>
                             <output_format>0</output_format>
                             <allow_traps>0</allow_traps>
                             <ssl_cert_file/>
@@ -4679,6 +4800,45 @@ Executed by Zabbix Agent  &#13;
                             </tags>
                         </trigger_prototype>
                         <trigger_prototype>
+                            <expression>({templ - Informix:zabifx[shmtotal,{#IFXSERVER}].last()} &gt; 0)&#13;
+ and (&#13;
+  ({templ - Informix:zabifx[shmtotal,{#IFXSERVER}].last()}* 0.9) &lt;= &#13;
+  {templ - Informix:zabifx[memtotaloc,{#IFXSERVER}].last()} &#13;
+)</expression>
+                            <recovery_mode>0</recovery_mode>
+                            <recovery_expression/>
+                            <name>trg - Informix DB {#IFXSERVER} - 10% of the memory allowed free</name>
+                            <correlation_mode>0</correlation_mode>
+                            <correlation_tag/>
+                            <url/>
+                            <status>0</status>
+                            <priority>2</priority>
+                            <description>Alarm if the amount of memory allocated into the OS become less of 10% close of the SHMTOTAL set.</description>
+                            <type>0</type>
+                            <manual_close>1</manual_close>
+                            <dependencies>
+                                <dependency>
+                                    <name>trg - Informix DB {#IFXSERVER} - memory allocated is close of 100% of memory allowed</name>
+                                    <expression>({templ - Informix:zabifx[shmtotal,{#IFXSERVER}].last()} &gt; 0)&#13;
+ and (&#13;
+  ({templ - Informix:zabifx[shmtotal,{#IFXSERVER}].last()}* 0.99) &lt;= &#13;
+  {templ - Informix:zabifx[memtotaloc,{#IFXSERVER}].last()} &#13;
+)</expression>
+                                    <recovery_expression/>
+                                </dependency>
+                            </dependencies>
+                            <tags>
+                                <tag>
+                                    <tag>Banco de dados</tag>
+                                    <value>informix</value>
+                                </tag>
+                                <tag>
+                                    <tag>Serviço</tag>
+                                    <value>Banco de dados</value>
+                                </tag>
+                            </tags>
+                        </trigger_prototype>
+                        <trigger_prototype>
                             <expression>{templ - Informix:zabifx[serverstatus,{#IFXSERVER}].last(0)}=6</expression>
                             <recovery_mode>0</recovery_mode>
                             <recovery_expression/>
@@ -4903,6 +5063,35 @@ This if only to trying get the problem of the out of logical log before night...
                             <status>0</status>
                             <priority>3</priority>
                             <description>Trigger the alarm if the automatic backup is *not* active.</description>
+                            <type>0</type>
+                            <manual_close>1</manual_close>
+                            <dependencies/>
+                            <tags>
+                                <tag>
+                                    <tag>Banco de dados</tag>
+                                    <value>informix</value>
+                                </tag>
+                                <tag>
+                                    <tag>Serviço</tag>
+                                    <value>Banco de dados</value>
+                                </tag>
+                            </tags>
+                        </trigger_prototype>
+                        <trigger_prototype>
+                            <expression>({templ - Informix:zabifx[shmtotal,{#IFXSERVER}].last()} &gt; 0)&#13;
+ and (&#13;
+  ({templ - Informix:zabifx[shmtotal,{#IFXSERVER}].last()}* 0.99) &lt;= &#13;
+  {templ - Informix:zabifx[memtotaloc,{#IFXSERVER}].last()} &#13;
+)</expression>
+                            <recovery_mode>0</recovery_mode>
+                            <recovery_expression/>
+                            <name>trg - Informix DB {#IFXSERVER} - memory allocated is close of 100% of memory allowed</name>
+                            <correlation_mode>0</correlation_mode>
+                            <correlation_tag/>
+                            <url/>
+                            <status>0</status>
+                            <priority>4</priority>
+                            <description>Alarm if the amount of memory allocated into the OS become close of 100% of the SHMTOTAL set.</description>
                             <type>0</type>
                             <manual_close>1</manual_close>
                             <dependencies/>
