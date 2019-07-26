@@ -21,8 +21,15 @@
 #  1) {#IFXSERVER}    Returned by "instances" key , is the INFORMIXSERVER of each engine detected
 #  2) {#IFXSERVERDBS} Returned by "dbspaces" key , where return the INFORMIXSERVER_DBSPACENAME detected
 
+export vOption=$1
+export INFORMIXSERVER=$2
+export vOptionParam=$3
+
 # Set your Informix variables here
-.  /etc/zabbix/env.ifx.sh
+# IMPORTANT: INFORMIXSERVER should be set before , for situations where have more than one instance
+#          : in the same server with different INFORMIXDIR instalation.
+#          : This way the YOUR script env.ifx.sh able to set correctly the variables.
+source  /etc/zabbix/env.ifx.sh
 
 # TECHINCAL ISSUE : The standard configuration of the Zabbix Agent for the systemd service enable the 
 #                 : PrivateTmp parameter as default, where they "chroot" the /tmp access
@@ -74,10 +81,6 @@ if [ $# -ne 2 -a $# -ne 3 ] ; then
   echo "ZBX_NOTSUPPORTED"
   exit 1
 fi
-
-export vOption=$1
-export INFORMIXSERVER=$2
-export vOptionParam=$3
 
 # If INFORMIXSERVER = - , blank it (not unset because it already is exported)
 [ "$INFORMIXSERVER" = "-" ] && INFORMIXSERVER=
