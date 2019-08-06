@@ -277,7 +277,7 @@ _param() {
     # Return # max of users sessions connected since the database started (or last onstat -z)
     topsessioncount) printf "${vParam1}|" ; 
                _onstat "-g ntu" | \
-                 $AWK '/#netscb/ { vNext=1 ; next } vNext == 1 { match($1,"/.*"); x=substr($1,RSTART+1, RLENGTH); print x; exit} '
+                 $AWK '/#netscb/ { vNext=1 ; next } vNext == 1 { x=substr($1,1,length($1)-1); print x; exit } '
                ;;
     # Return # system threads 
     systemthreads) printf "${vParam1}|" ; 
