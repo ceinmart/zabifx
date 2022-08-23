@@ -65,8 +65,9 @@ echo "
  #              key   : key used to identify the data to collect
  #                    : Discovery keys : instances - 
  #                    :                : dbspaces  - 
+ #                    :                : sbspaces  - 
  #   INFORMIXSERVER   : The instance name
- # optional_parameter : Used with dbspaces* keys
+ # optional_parameter : Used with dbspaces* keys and sbspaces* keys
 "
 }
 
@@ -95,6 +96,7 @@ vONSTAT_CACHE=2
 # Theses temporarys are kept for 2 minutes to avoid overloading the "onstat" calls
 vTmpName=tmp.zabifx.${INFORMIXSERVER:-null}
 vTmpDir=$(dirname $0)
+[ ! -z "$vZBX_DIR" ] && vTmpDir=$vZBX_DIR
 vTmp=$vTmpDir/$vTmpName
 vTmp1=${vTmp}.1
 
@@ -140,7 +142,7 @@ _onstat(){
 _param() { 
   vParam1=$1
   vParam2=$2
-  [[ ! $vParam1 =~ ^(instances|serverstatus|dbspaces)$ ]] && [ "$vOnstatStatus" != 5 -a "$vOnstatStatus" != 2 ] && echo "${vParam1}|ZBX_NOTSUPPORTED" && return
+  [[ ! $vParam1 =~ ^(instances|serverstatus|dbspaces|sbspaces)$ ]] && [ "$vOnstatStatus" != 5 -a "$vOnstatStatus" != 2 ] && echo "${vParam1}|ZBX_NOTSUPPORTED" && return
   case ${vParam1} in
     # Return Server Status , # 0   Initialization mode
                              # 1   Quiescent mode
@@ -238,7 +240,7 @@ _param() {
     #       }
     #    ]
     # }
-    dbspaces)
+    dbspaces|sbspaces)
              echo "${vParam1}|{\"data\":["
              # Execute for each instance
              {
@@ -248,7 +250,7 @@ _param() {
                _onstat_status
                _onstat "-d" | \
                  $AWK -v FS='\n' -v RS='' '/^Dbspaces/' | \
-                 $AWK -v i=$INFORMIXSERVER '
+                 $AWK -v i=$INFORMIXSERVER -v vOpcao=$vParam1 '
                    #
                    # Identify position of the second "flags" columns 
                    /^address/ { x=index($0,"pgsize")+6 ; xx=index(substr($0,30),"flags")+29+5; vFlagI=x ; vFlagL=xx-x } 
@@ -256,11 +258,18 @@ _param() {
                    # Skip lines
                    /^Dbspace|^address|active.*maximum/ { next } 
                    #
+                   # get the flags
+                   {
+                     flag=substr($0,vFlagI,vFlagL)
+                     gsub(/^ *| *$/,"",flag)
+                     #
+                     # if sbspaces , filter ...
+                     if ( vOpcao == "sbspaces" && flag !~ /^..[SU]/ ) { next } 
+                   }
+                   #
                    # print the data
                    { printf "{ \"{#IFXSERVER}\":\""i"\""
                      printf ",\"{#IFXDBSPACE}\":\""$NF"\"  " 
-                     flag=substr($0,vFlagI,vFlagL)
-                     gsub(/^ *| *$/,"",flag)
                      print  ",\"{#IFXDBSPACEFLAG}\":\""flag"\" } " 
                    }
                    '
@@ -491,7 +500,7 @@ _param() {
                  fi 
                  ;;
     # Dbspace flag
-    dbspaceflag)
+    dbspaceflag|sbspaceflag)
                 printf "${vParam1}|"   
                 value=$(_onstat "-d" | $AWK -v FS='\n' -v RS='' '/^Dbspace/' |\
                 $AWK -v vDBS=$vParam2 '
@@ -515,6 +524,47 @@ _param() {
                   echo "ZBX_NOTSUPPORTED"
                 fi
                 ;;
+    # SBspace monitor
+    sbspacesize|sbspacefree|sbspaceitems) 
+                printf "${vParam1}|"   
+                vPrint=0
+                # ${vDBS[0]}=number, ${vDBS[1]}=pgsize ,${vDBS[2]}=name 
+                vDBS=($( _onstat "-d"  | $AWK -v vDBS=${vParam2} 'vDBS == $NF {print $2,$6,$NF ; exit } ' ))
+                #
+                if [[ ! -z "${vDBS[*]}" ]] ; then 
+                  #  vnDbs  : Numero do DbSpace
+                  #  vPgSize: Page Size
+                  #  vDbs   : Nome do DbSpace
+                  #  echo $vnDbs $vPgSize $vDbs
+                  if  [ "${vParam1}" = "sbspaceitems" ]  ; then 
+                    _onstat "-g smb e " | grep -c "\[${vDBS[0]},"  
+                  else
+                    _onstat "-g smb c " |\
+                    $AWK -v vOpcao=${vParam1} -v vnDbs=${vDBS[0]} -v vDbs="${vDBS[2]}" -v vV="m" -v vPg=${vDBS[1]} '
+                      BEGIN { 
+                              if (vV == "b") vV=1;
+                              if (vV == "k") vV=1024;
+                              if (vV == "m") vV=1024*1024;
+                              if (vV == "g") vV=1024*1024*1024;
+                              #-#if (vPg > 1000) vPg=vPg/1024;
+                      }
+                      /^sbnum/ && $2 == vnDbs { 
+                        ##sb=$2SUBSEP$4 ; 
+                        sb=$2 
+                        getline ; getline ; 
+                        sb_size[sb]=+($4*vPg)/vV ; 
+                        sb_free[sb]=+($7*vPg)/vV ; 
+                      } 
+                      END { 
+                        if (vOpcao ~ "sbspacesize") printf "%-10.2f\n" , sb_size[sb]
+                        if (vOpcao ~ "sbspacefree") printf "%-10.2f\n" , sb_free[sb]
+                      } 
+                      '
+                  fi 
+                 else
+                   echo "ZBX_NOTSUPPORTED"
+                 fi 
+                 ;;
 
     # Return memory free
     mem*free) printf "${vParam1}|" ; 
