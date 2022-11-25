@@ -1,0 +1,2722 @@
+{
+    "zabbix_export": {
+        "version": "6.2",
+        "date": "2022-11-25T18:18:58Z",
+        "template_groups": [
+            {
+                "uuid": "4fdbe0569412426eb8b1bfead07d5d82",
+                "name": "Templates"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "d00587b0ca884e9789fa3f7a70902eaa",
+                "template": "templ - Informix",
+                "name": "templ - Informix",
+                "groups": [
+                    {
+                        "name": "Templates"
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "55c7762569a146d2bf877aa5cd5b3c8a",
+                        "name": "Informix dbspaces",
+                        "key": "zabifx[dbspaces,-]",
+                        "delay": "2h",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#IFXDBSPACEFLAG}",
+                                    "value": "[NM].[TSUB]",
+                                    "operator": "NOT_MATCHES_REGEX",
+                                    "formulaid": "A"
+                                }
+                            ]
+                        },
+                        "description": "Lista todos os dbspaces para instancia encontrada no servidor.\nO script zabifx utiliza o comando \"onstat -g dis\" + \"onstat -d\" para identificar os dbspaces.\nEla gera duas macros : {#IFXSERVER} , {#IFXDBSPACE}\n\n{                                       \n   \"data\":[                             \n      {                                 \n         \"{#IFXSERVER}\":\"ifxdesenv2\",   \n         \"{#IFXDBSPACE}\":\"rootdbs\"      \n      },                                \n      {                                 \n         \"{#IFXSERVER}\":\"ifxdesenv2\",   \n         \"{#IFXDBSPACE}\":\"llogdbs\"      \n      },                                \n      {                                 \n         \"{#IFXSERVER}\":\"ifxdesenv2\",   \n         \"{#IFXDBSPACE}\":\"plogdbs\"      \n      },                                \n      {                                 \n         \"{#IFXSERVER}\":\"ifxdesenv1\",   \n         \"{#IFXDBSPACE}\":\"rootdbs\"      \n      },                                \n      {                                 \n         \"{#IFXSERVER}\":\"ifxdesenv1\",   \n         \"{#IFXDBSPACE}\":\"softeldat1dbs\"\n      }                                 \n   ]                                    \n}",
+                        "item_prototypes": [
+                            {
+                                "uuid": "18d4041b567648e19d21ffd8f4ae2db9",
+                                "name": "{#IFXSERVER} / {#IFXDBSPACE} - Flags",
+                                "type": "ZABBIX_ACTIVE",
+                                "key": "zabifx[dbspaceflag,{#IFXSERVER},{#IFXDBSPACE}]",
+                                "delay": "10m",
+                                "history": "15d",
+                                "trends": "0",
+                                "value_type": "TEXT",
+                                "description": "Get dbspace char Flags  where :\nPosition 1:\n  M Mirrored\n  N Not mirrored\nPosition 2:\n  X Newly mirrored\n  P Physically recovered, waiting for logical recovery\n  L Being logically recovered\n  R Being recovered\n  D Down\nPosition 3:\n  B Blobspace\n  P Plogspace\n  S Sbspace\n  T Temporary dbspace\n  U Temporary sbspace\n  W Temporary dbspace on primary server (This flag is shown on SD secondary servers only.)\nPosition 4:\n  B The dbspace can have large chunks that are greater than 2 GB.\nPosition 5:\n  A The dbspace is auto-expandable because the SP_AUTOEXPAND configuration parameter is enabled and the dbspace is configured with a create size or extend size that is not zero.\nPosition 6:\n  E The storage space is encrypted.",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - dbspaces"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "9cafa1d91f9f4388a7c4ae9ca7f886a8",
+                                        "expression": "find(/templ - Informix/zabifx[dbspaceflag,{#IFXSERVER},{#IFXDBSPACE}],1s,\"regexp\",\"^.D\")=1",
+                                        "name": "Informix DB - {#IFXSERVER} / {#IFXDBSPACE} - DBSpace DOWN",
+                                        "priority": "DISASTER",
+                                        "description": "Flag do DBSPACE est\u00e1 indicando como DOWN , algum problema de disco ou no banco de dados indisponibilizou este dbspace.",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "43af00a13dca4c96873e50482cb79989",
+                                        "expression": "find(/templ - Informix/zabifx[dbspaceflag,{#IFXSERVER},{#IFXDBSPACE}],1s,\"regexp\",\"^.L\")=1",
+                                        "name": "Informix DB - {#IFXSERVER} / {#IFXDBSPACE} - DBSpace in Logical recovery",
+                                        "priority": "INFO",
+                                        "description": "Dbspace em modo Logical Recovery",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "2cc49ae909cb40e0b2bb14a55ad8e36b",
+                                        "expression": "find(/templ - Informix/zabifx[dbspaceflag,{#IFXSERVER},{#IFXDBSPACE}],1s,\"regexp\",\"^.P\")=1",
+                                        "name": "Informix DB - {#IFXSERVER} / {#IFXDBSPACE} - DBSpace in Physical recovery",
+                                        "priority": "INFO",
+                                        "description": "Dbspace em modo Physical Recovery",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "cc069ac5e8394d64a91e3069690744ea",
+                                        "expression": "find(/templ - Informix/zabifx[dbspaceflag,{#IFXSERVER},{#IFXDBSPACE}],1s,\"regexp\",\"^.R\")=1",
+                                        "name": "Informix DB - {#IFXSERVER} / {#IFXDBSPACE} - DBSpace in Recovery mode",
+                                        "priority": "INFO",
+                                        "description": "Dbspace em modo recovery",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "62eb1fe5949042f481a8caa2de580360",
+                                "name": "{#IFXSERVER} / {#IFXDBSPACE} - Free",
+                                "key": "zabifx[dbspacefree,{#IFXSERVER},{#IFXDBSPACE}]",
+                                "delay": "1h",
+                                "history": "32d",
+                                "value_type": "FLOAT",
+                                "units": "MB",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - dbspaces"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "9fbf28c99755493089f6753b24fd22c4",
+                                "name": "{#IFXSERVER} / {#IFXDBSPACE} - Size",
+                                "key": "zabifx[dbspacesize,{#IFXSERVER},{#IFXDBSPACE}]",
+                                "delay": "3h",
+                                "history": "32d",
+                                "value_type": "FLOAT",
+                                "units": "MB",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - dbspaces"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "1878e5782cc94dcba4f3a9e760e027de",
+                                "name": "{#IFXSERVER} / {#IFXDBSPACE} - Used",
+                                "key": "zabifx[dbspaceused,{#IFXSERVER},{#IFXDBSPACE}]",
+                                "delay": "1h",
+                                "history": "32d",
+                                "value_type": "FLOAT",
+                                "units": "MB",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - dbspaces"
+                                    }
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [
+                            {
+                                "uuid": "a47b450a4e0942fb8418b1c9bbfa1ad4",
+                                "expression": "((last(/templ - Informix/zabifx[dbspacefree,{#IFXSERVER},{#IFXDBSPACE}]) * 100) / last(/templ - Informix/zabifx[dbspacesize,{#IFXSERVER},{#IFXDBSPACE}])) < 1",
+                                "name": "Informix DB - {#IFXSERVER} / {#IFXDBSPACE} - FULL",
+                                "priority": "HIGH",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "Servi\u00e7o",
+                                        "value": "Banco de dados"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "884c7c78bf684a3c82c6a125b8792e06",
+                                "expression": "(\nlast(/templ - Informix/zabifx[dbspacefree,{#IFXSERVER},{#IFXDBSPACE}],#1:now-3h) - \nlast(/templ - Informix/zabifx[dbspacefree,{#IFXSERVER},{#IFXDBSPACE}]) \n)> (\nlast(/templ - Informix/zabifx[dbspacesize,{#IFXSERVER},{#IFXDBSPACE}]) * 0.10\n)",
+                                "name": "Informix DB - {#IFXSERVER} / {#IFXDBSPACE} - Huge space allocation (+10%) - {ITEM.VALUE} MBytes",
+                                "status": "DISABLED",
+                                "priority": "INFO",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "Servi\u00e7o",
+                                        "value": "Banco de dados"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "aea6c60a41084802aa1026d8b714bd2c",
+                                "expression": "(last(/templ - Informix/zabifx[dbspacefree,{#IFXSERVER},{#IFXDBSPACE}]) < {$MAX_FREE_ALERT_MB}) and \n((last(/templ - Informix/zabifx[dbspacefree,{#IFXSERVER},{#IFXDBSPACE}]) * 100) / last(/templ - Informix/zabifx[dbspacesize,{#IFXSERVER},{#IFXDBSPACE}])) < 5",
+                                "name": "Informix DB - {#IFXSERVER} / {#IFXDBSPACE} - Less than {$MAX_FREE_ALERT_MB} MB or 5% free - {ITEM.VALUE} MBytes",
+                                "priority": "AVERAGE",
+                                "manual_close": "YES",
+                                "dependencies": [
+                                    {
+                                        "name": "Informix DB - {#IFXSERVER} / {#IFXDBSPACE} - FULL",
+                                        "expression": "((last(/templ - Informix/zabifx[dbspacefree,{#IFXSERVER},{#IFXDBSPACE}]) * 100) / last(/templ - Informix/zabifx[dbspacesize,{#IFXSERVER},{#IFXDBSPACE}])) < 1"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Servi\u00e7o",
+                                        "value": "Banco de dados"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "e004ae53e4dc426189e5f3b651cffcc0",
+                                "expression": "(last(/templ - Informix/zabifx[dbspacefree,{#IFXSERVER},{#IFXDBSPACE}]) < {$MAX_FREE_ALERT_MB}) and \n((last(/templ - Informix/zabifx[dbspacefree,{#IFXSERVER},{#IFXDBSPACE}]) * 100) / last(/templ - Informix/zabifx[dbspacesize,{#IFXSERVER},{#IFXDBSPACE}])) < 10",
+                                "name": "Informix DB - {#IFXSERVER} / {#IFXDBSPACE} - Less than {$MAX_FREE_ALERT_MB}MB or 10% free - {ITEM.VALUE} MBytes",
+                                "priority": "WARNING",
+                                "manual_close": "YES",
+                                "dependencies": [
+                                    {
+                                        "name": "Informix DB - {#IFXSERVER} / {#IFXDBSPACE} - FULL",
+                                        "expression": "((last(/templ - Informix/zabifx[dbspacefree,{#IFXSERVER},{#IFXDBSPACE}]) * 100) / last(/templ - Informix/zabifx[dbspacesize,{#IFXSERVER},{#IFXDBSPACE}])) < 1"
+                                    },
+                                    {
+                                        "name": "Informix DB - {#IFXSERVER} / {#IFXDBSPACE} - Less than {$MAX_FREE_ALERT_MB} MB or 5% free - {ITEM.VALUE} MBytes",
+                                        "expression": "(last(/templ - Informix/zabifx[dbspacefree,{#IFXSERVER},{#IFXDBSPACE}]) < {$MAX_FREE_ALERT_MB}) and \n((last(/templ - Informix/zabifx[dbspacefree,{#IFXSERVER},{#IFXDBSPACE}]) * 100) / last(/templ - Informix/zabifx[dbspacesize,{#IFXSERVER},{#IFXDBSPACE}])) < 5"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Servi\u00e7o",
+                                        "value": "Banco de dados"
+                                    }
+                                ]
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "7d38f90721f04effb322d01a1a9ed5bc",
+                                "name": "Informix DB {#IFXSERVER} / {#IFXDBSPACE} - Space used",
+                                "type": "STACKED",
+                                "ymin_type_1": "ITEM",
+                                "ymin_item_1": {
+                                    "host": "templ - Informix",
+                                    "key": "zabifx[dbspacesize,{#IFXSERVER},{#IFXDBSPACE}]"
+                                },
+                                "graph_items": [
+                                    {
+                                        "color": "4000FF",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[dbspacefree,{#IFXSERVER},{#IFXDBSPACE}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "color": "FF0000",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[dbspaceused,{#IFXSERVER},{#IFXDBSPACE}]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "99a22d07ea2244fcaf0f2eb15d41c019",
+                        "name": "Informix Instances",
+                        "key": "zabifx[instances,-]",
+                        "delay": "2h",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#IFXSERVERSTATUS}",
+                                    "value": "Up",
+                                    "formulaid": "A"
+                                }
+                            ]
+                        },
+                        "description": "Lista cada instancia encontrada no servidor.\nO script zabifx utiliza o comando \"onstat -g dis\" para identificar as instancias e retorna duas macros : {#IFXSERVER} , {#IFXSERVERSTATUS} :\n\n{                                     \n   \"instances\":[                      \n      {                               \n         \"#{IFXSERVER}\":\"ifxdesenv2\", \n         \"#{IFXSERVERSTATUS}\":\"Up\"    \n      },                              \n      {                               \n         \"#{IFXSERVER}\":\"ifxdesenv1\", \n         \"#{IFXSERVERSTATUS}\":\"Up\"    \n      }                               \n   ]                                  \n}",
+                        "item_prototypes": [
+                            {
+                                "uuid": "d4fb3131bf654837b7b7aa0c92133e2d",
+                                "name": "Informix DB  {#IFXSERVER} - Assert Faileds raised",
+                                "type": "ZABBIX_ACTIVE",
+                                "key": "log[{#IFXMSGPATH},\"Assert Failed\"]",
+                                "delay": "10m",
+                                "history": "30d",
+                                "trends": "0",
+                                "value_type": "LOG",
+                                "description": "How many times occur an Assert Failed",
+                                "logtimefmt": "MM/dd/yyyy hh:mm:ss",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "38d2d2e3373a4a689f21c94b8528ccd5",
+                                        "expression": "count(/templ - Informix/log[{#IFXMSGPATH},\"Assert Failed\"],10m,,\"Assert\")>0",
+                                        "recovery_mode": "NONE",
+                                        "name": "trg - Informix DB {#IFXSERVER} - Assert Failed !!",
+                                        "priority": "HIGH",
+                                        "description": "Foi identificado no online.log a gera\u00e7\u00e3o de algum Assert Failed.\n--\nConferir os ultimos arquivos gerados na pastas $INFORMIXDIR/tmp/dump/*.af\nIdentificar nele a sess\u00e3o , usu\u00e1rio e SQL que estava executando.\nAvaliar a situa\u00e7\u00e3o, se necess\u00e1rio abrir chamado na IBM e enviar os AFs + online.log .\n--",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "29ac24becc7a437e97e899702d8d7355",
+                                "name": "Informix DB {#IFXSERVER} - # Sessions Active",
+                                "key": "zabifx[activesessioncount,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "1w",
+                                "description": "# of Active Sessions.\nExecuted by Zabbix Agent  \n+ UserParameter\n+ zabifx script",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - sessions"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "9cc37c8966dd4dec875bbf693dffffd2",
+                                "name": "Informix DB {#IFXSERVER} - Buffer flushes",
+                                "key": "zabifx[buffer_flushes,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "1w",
+                                "description": "The number of times the buffers are flushed to disk so far.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "084561237a3e478d8145f89e9c550733",
+                                "name": "Informix DB {#IFXSERVER} - Buffer Waits",
+                                "key": "zabifx[buffer_waits,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "1w",
+                                "description": "The number of buffer waits.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "4dc47923fc2d46d28188eadc10b67b6f",
+                                "name": "Informix DB {#IFXSERVER} - Checkpoints",
+                                "key": "zabifx[checkpoints,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "1w",
+                                "description": "The number of checkpoints taken so far.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "2fc96287f0374ba4918ea3cbc9d706de",
+                                "name": "Informix DB {#IFXSERVER} - Checkpoint in Progress",
+                                "key": "zabifx[checkpoint_inprogress,{#IFXSERVER}]",
+                                "history": "1w",
+                                "description": "The value of yes if a checkpoint is underway.",
+                                "valuemap": {
+                                    "name": "Yes (1) / No (0)"
+                                },
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "1bf511dd32154224961c3e912c0271e2",
+                                "name": "Informix DB {#IFXSERVER} - Time since last checkpoint",
+                                "key": "zabifx[checkpoint_last,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "1w",
+                                "status": "DISABLED",
+                                "units": "s",
+                                "description": "Time (in secs) since the last checkpoint occured.",
+                                "preprocessing": [
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.01"
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "e12c138351b446f28862e884a6863dcc",
+                                "name": "Informix DB {#IFXSERVER} - Checkpoints Waits",
+                                "key": "zabifx[checkpoint_waits,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "1w",
+                                "description": "The number of checkpoint waits.",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHANGE_PER_SECOND",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "72f412ad448547b9bce6910cb9186b94",
+                                "name": "Informix DB {#IFXSERVER} - # Deadlocks",
+                                "key": "zabifx[deadlocks,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "1w",
+                                "description": "The number of deadlocks detected so far.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "ebff835760a64df6981b3f616def4109",
+                                        "expression": "last(/templ - Informix/zabifx[deadlocks,{#IFXSERVER}]) <> last(/templ - Informix/zabifx[deadlocks,{#IFXSERVER}])",
+                                        "name": "trg - Informix DB {#IFXSERVER} - Deadlocks : {ITEM.VALUE}",
+                                        "priority": "INFO",
+                                        "description": "Trigger alarm if occur to any Dead Lock",
+                                        "type": "MULTIPLE",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "476135b5e5734ecdbdf7ddab6a82a60e",
+                                "name": "Informix DB {#IFXSERVER} - # Foreground Writes",
+                                "key": "zabifx[fgwrites,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "1w",
+                                "description": "The number of foreground writes.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "c6de057b176b48cba43c2352f41ef56d",
+                                "name": "Informix DB {#IFXSERVER} - Instance Name",
+                                "key": "zabifx[instance,{#IFXSERVER}]",
+                                "delay": "6h",
+                                "history": "180d",
+                                "trends": "0",
+                                "value_type": "TEXT",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "55bbe5d7c820449ba2572dc0ff5c7885",
+                                "name": "Informix DB {#IFXSERVER} - # Latchs Waits",
+                                "key": "zabifx[latches_waits,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "1w",
+                                "description": "The total number of times any thread waited for a latch.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "48356ea05786410f97f5f0bcd53cf562",
+                                "name": "Informix DB  {#IFXSERVER} - Logical Log Automatic Backup (zabifx)",
+                                "key": "zabifx[llogautobkp,{#IFXSERVER}]",
+                                "delay": "5m",
+                                "history": "1w",
+                                "description": "Logical Log Auto backup status , based at alarmprogram script\n\nreturn : true or false",
+                                "valuemap": {
+                                    "name": "Yes (1) / No (0)"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "BOOL_TO_DECIMAL",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "580adb4bfc2047c0bc4a9c27bb78263d",
+                                        "expression": "last(/templ - Informix/zabifx[llogautobkp,{#IFXSERVER}])<>1",
+                                        "name": "trg - Informix DB {#IFXSERVER} - Logical Log auto backup NOT active.",
+                                        "priority": "AVERAGE",
+                                        "description": "Trigger the alarm if the automatic backup is *not* active.",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "7303a0482a3f4133aa2ea8a855579ce2",
+                                "name": "Informix DB {#IFXSERVER} - # Logical Logs used",
+                                "key": "zabifx[llogcurrent,{#IFXSERVER}]",
+                                "delay": "2m",
+                                "history": "1w",
+                                "units": "logs",
+                                "description": "# of Logical Logs used\n(based on uniqueid flow, onstat -l)\n\nExecuted by Zabbix Agent  \n+ UserParameter\n+ zabifx script",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "284447a70173477b8de3c5da90d4d3a6",
+                                "name": "Informix DB {#IFXSERVER} - # Logical Logs without backup",
+                                "key": "zabifx[llogwithoutbkp,{#IFXSERVER}]",
+                                "delay": "15m;2m/1-5,08:00-17:30",
+                                "history": "1w",
+                                "units": "logs",
+                                "description": "# of Logical Logs without backup\n\nExecuted by Zabbix Agent  \n+ UserParameter\n+ zabifx script",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "b8fd4eb5b14b4a7190d186738dad5577",
+                                "name": "Informix DB {#IFXSERVER} - % Logical Logs without backup",
+                                "key": "zabifx[llogwithoutbkpperc,{#IFXSERVER}]",
+                                "delay": "15m;2m/1-5,08:00-17:30",
+                                "history": "1w",
+                                "value_type": "FLOAT",
+                                "units": "%",
+                                "description": "% of Logical Logs without backup\n(calculed from the # of active logs, onstat -l output)\n\nExecuted by Zabbix Agent  \n+ UserParameter\n+ zabifx script",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "55608588654a4678b56d8ae93d5b083c",
+                                        "expression": "last(/templ - Informix/zabifx[llogwithoutbkpperc,{#IFXSERVER}])>5 and ( ( {TRIGGER.VALUE}=0 and (time()<080000 or time()>173000) ) or {TRIGGER.VALUE}=1 )",
+                                        "name": "trg - Informix DB {#IFXSERVER} - Basic alarm Logical Log without backup",
+                                        "status": "DISABLED",
+                                        "priority": "INFO",
+                                        "description": "Trigger the alarm if the number of logical logs without backup reach 5% of available logs.\n\nAlarm only at non-comercial time.... \nThis if only to trying get the problem of the out of logical log before night...",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "df83be083515473b850c6f7f48b0fa3e",
+                                        "expression": "last(/templ - Informix/zabifx[llogwithoutbkpperc,{#IFXSERVER}])>29",
+                                        "name": "trg - Informix DB {#IFXSERVER} - {ITEM.VALUE}% Logical Log without backup",
+                                        "priority": "INFO",
+                                        "description": "Trigger the alarm if the number of logical logs without backup reach 30% of available logs.",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "trg - Informix DB {#IFXSERVER} - {ITEM.VALUE}% Logical Log without backup",
+                                                "expression": "last(/templ - Informix/zabifx[llogwithoutbkpperc,{#IFXSERVER}])>49"
+                                            },
+                                            {
+                                                "name": "trg - Informix DB {#IFXSERVER} - {ITEM.VALUE}% Logical Log without backup",
+                                                "expression": "last(/templ - Informix/zabifx[llogwithoutbkpperc,{#IFXSERVER}])>69"
+                                            },
+                                            {
+                                                "name": "trg - Informix DB {#IFXSERVER} - {ITEM.VALUE}% Logical Log without backup",
+                                                "expression": "last(/templ - Informix/zabifx[llogwithoutbkpperc,{#IFXSERVER}])>89"
+                                            }
+                                        ],
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "88270cd56018441588ab568faf9eb4c8",
+                                        "expression": "last(/templ - Informix/zabifx[llogwithoutbkpperc,{#IFXSERVER}])>49",
+                                        "name": "trg - Informix DB {#IFXSERVER} - {ITEM.VALUE}% Logical Log without backup",
+                                        "priority": "WARNING",
+                                        "description": "Trigger the alarm if the number of logical logs without backup reach 50% of available logs.",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "trg - Informix DB {#IFXSERVER} - {ITEM.VALUE}% Logical Log without backup",
+                                                "expression": "last(/templ - Informix/zabifx[llogwithoutbkpperc,{#IFXSERVER}])>69"
+                                            },
+                                            {
+                                                "name": "trg - Informix DB {#IFXSERVER} - {ITEM.VALUE}% Logical Log without backup",
+                                                "expression": "last(/templ - Informix/zabifx[llogwithoutbkpperc,{#IFXSERVER}])>89"
+                                            }
+                                        ],
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "a165225feced4bcdbd00f63659e5da86",
+                                        "expression": "last(/templ - Informix/zabifx[llogwithoutbkpperc,{#IFXSERVER}])>69",
+                                        "name": "trg - Informix DB {#IFXSERVER} - {ITEM.VALUE}% Logical Log without backup",
+                                        "priority": "HIGH",
+                                        "description": "Trigger the alarm if the number of logical logs without backup reach 70% of available logs.",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "trg - Informix DB {#IFXSERVER} - {ITEM.VALUE}% Logical Log without backup",
+                                                "expression": "last(/templ - Informix/zabifx[llogwithoutbkpperc,{#IFXSERVER}])>89"
+                                            }
+                                        ],
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "4836a060595d460fa11f2a58fa2bf303",
+                                        "expression": "last(/templ - Informix/zabifx[llogwithoutbkpperc,{#IFXSERVER}])>89",
+                                        "name": "trg - Informix DB {#IFXSERVER} - {ITEM.VALUE}% Logical Log without backup",
+                                        "priority": "HIGH",
+                                        "description": "Trigger the alarm if the number of logical logs without backup reach 90% of available logs.",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "0378e9d27bfc425c92a29498d87dbaae",
+                                "name": "Informix DB {#IFXSERVER} - # LRU writes",
+                                "key": "zabifx[lruwrites,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "1w",
+                                "description": "The number of LRU writes.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "6dc4a217990f42c099b669d56ddf3ccc",
+                                "name": "Informix DB {#IFXSERVER} - Memory Free Buffer",
+                                "key": "zabifx[membuffree,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "B",
+                                "description": "Total of memory Buffer Pool used \n(summary of onstat -g seg)",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - Memory"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "b3ae1867e179411ea8db36837733c9d8",
+                                "name": "Informix DB {#IFXSERVER} - Memory Used Buffer",
+                                "key": "zabifx[membufused,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "B",
+                                "description": "Total of memory Buffer Pool used \n(summary of onstat -g seg)",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - Memory"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "10824911a35245378417114078aa29b0",
+                                "name": "Informix DB {#IFXSERVER} - Memory Free Extent",
+                                "key": "zabifx[memextfree,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "B",
+                                "description": "Total of memory Extent free (datablades)\n(summary of onstat -g seg)",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - Memory"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "7e67213da6c7473dafdf88c6542c6ac6",
+                                "name": "Informix DB {#IFXSERVER} - Memory Used Extent",
+                                "key": "zabifx[memextused,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "B",
+                                "description": "Total of memory Extent used  (datablades)\n(summary of onstat -g seg)",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - Memory"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "e072e37e3774485894688f011b86e3bb",
+                                "name": "Informix DB {#IFXSERVER} - Memory Free Residence",
+                                "key": "zabifx[memresfree,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "B",
+                                "description": "Total of memory Resident Pool free\n(summary of onstat -g seg)",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - Memory"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "da0b84f5e68b4ffa985739b3cdd4008b",
+                                "name": "Informix DB {#IFXSERVER} - Memory Used Residence",
+                                "key": "zabifx[memresused,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "B",
+                                "description": "Total of memory Resident Pool used \n(summary of onstat -g seg)",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - Memory"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "2b39ef94a7df46f99782a88310ef4d97",
+                                "name": "Informix DB {#IFXSERVER} - Memory Allocated",
+                                "key": "zabifx[memtotaloc,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "B",
+                                "description": "Total of memory allocated in the O.S.\n(summary of onstat -g seg)",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - Memory"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "aedb6fb105704426b4f62f0b8265b364",
+                                "name": "Informix DB {#IFXSERVER} - Memory Free Total",
+                                "key": "zabifx[memtotfree,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "B",
+                                "description": "Total of memory Total free\n(summary of onstat -g seg)",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - Memory"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "c9d12a07368743ad92df9e33bed9100c",
+                                "name": "Informix DB {#IFXSERVER} - Memory Used Total",
+                                "key": "zabifx[memtotused,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "B",
+                                "description": "Total of memory Total used \n(summary of onstat -g seg)",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - Memory"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "b17b1d15198b41eab7dc7c11f97cd8a2",
+                                "name": "Informix DB {#IFXSERVER} - Memory Free Virtual",
+                                "key": "zabifx[memvirfree,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "B",
+                                "description": "Total of memory Virtual Pool free\n(summary of onstat -g seg)",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - Memory"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "25cbb40e3232491982100ba04110a1af",
+                                "name": "Informix DB {#IFXSERVER} - Memory Used Virtual",
+                                "key": "zabifx[memvirused,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "B",
+                                "description": "Total of memory Virtual Pool used \n(summary of onstat -g seg)",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - Memory"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "0b2fae035dbd45e1a7e2af2fc6492eec",
+                                "name": "Informix DB  {#IFXSERVER} - Online.log MSGPATH",
+                                "key": "zabifx[msgpath,{#IFXSERVER}]",
+                                "delay": "6h",
+                                "history": "30d",
+                                "trends": "0",
+                                "value_type": "TEXT",
+                                "description": "The filename of the online.log",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "cebe48e891464c1aa9e7327c483a3cd9",
+                                "name": "Informix DB {#IFXSERVER} - # Network accepteds",
+                                "key": "zabifx[network_accepted,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "1w",
+                                "description": "The number of network connection accepted so far.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - I/O"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "f223e543b0084abb9c970f478e942e6c",
+                                "name": "Informix DB {#IFXSERVER} - # Network reads",
+                                "key": "zabifx[network_reads,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "1w",
+                                "description": "The number of network reads so far.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - I/O"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "8c43a4b328ec45e286c1beec14a3a854",
+                                "name": "Informix DB {#IFXSERVER} - # Network rejected",
+                                "key": "zabifx[network_rejected,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "1w",
+                                "description": "The number of network connection rejected so far.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - I/O"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "2555cd749cd841f1a7596de240eb6455",
+                                "name": "Informix DB {#IFXSERVER} - # Network writes",
+                                "key": "zabifx[network_writes,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "1w",
+                                "description": "The number of network writes so far.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - I/O"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "3c4e1a7606c44da38dcbcd419378dba6",
+                                "name": "Informix DB {#IFXSERVER} - Physical Log Size",
+                                "key": "zabifx[physize,{#IFXSERVER}]",
+                                "delay": "6h",
+                                "history": "2d",
+                                "units": "bytes",
+                                "description": "Size of Physical log in bytes",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "54a53f798c834c28aacbc324ca8ea0ba",
+                                "name": "Informix DB {#IFXSERVER} - Physical Log pages used",
+                                "key": "zabifx[phyused,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "2d",
+                                "units": "bytes",
+                                "description": "The number of bytes used in the physical logfile.",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "1c99a7eab30b4a82a299970704f0296d",
+                                "name": "Informix DB {#IFXSERVER} - # RSS Backlog",
+                                "key": "zabifx[rssbacklog,{#IFXSERVER}]",
+                                "delay": "5m",
+                                "history": "1w",
+                                "units": "Pages",
+                                "description": "# of RSS backlog ( ~ delay ) in pages (logical log)\n\nExecuted by Zabbix Agent  \n+ UserParameter\n+ zabifx script",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - cluster"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "8d6fcfece35748a49b252c86c70f24a5",
+                                "name": "Informix DB {#IFXSERVER} - # RSS Connections active",
+                                "key": "zabifx[rssconnactive,{#IFXSERVER}]",
+                                "delay": "5m",
+                                "history": "1w",
+                                "units": "Conections",
+                                "description": "# of RSS connections active\n\nExecuted by Zabbix Agent  \n+ UserParameter\n+ zabifx script",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - cluster"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "b4b8918bdf5a47a89351db41fe9e2c3b",
+                                "name": "Informix DB {#IFXSERVER} - # RSS Servers",
+                                "key": "zabifx[rssservers,{#IFXSERVER}]",
+                                "delay": "30m",
+                                "history": "1w",
+                                "description": "# of RSS servers configured\n\nExecuted by Zabbix Agent  \n+ UserParameter\n+ zabifx script",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - cluster"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "12c4426d849d48cba7896a44058c551a",
+                                "name": "Informix DB  {#IFXSERVER} - Status (zabifx)",
+                                "key": "zabifx[serverstatus,{#IFXSERVER}]",
+                                "delay": "2m",
+                                "history": "1w",
+                                "description": "Informix database status , based at onstat return : \n\nonstat - ; $?\n# 0   Initialization mode\n# 1   Quiescent mode\n# 2   Recovery mode\n# 3   Backup mode\n# 4   Shutdown mode\n# 5   Online mode\n# 6   Abort mode\n# 7   User mode\n# 255     Off-Line mode",
+                                "valuemap": {
+                                    "name": "Informix - Database status"
+                                },
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "8ea57b80254e4469a2229ee286f74329",
+                                        "expression": "last(/templ - Informix/zabifx[serverstatus,{#IFXSERVER}])=6",
+                                        "name": "trg - Informix DB {#IFXSERVER} - Abort mode (zabifx)",
+                                        "priority": "HIGH",
+                                        "description": "Status differ 5 (online)  , database isn't available to users.\n\n# 0   Initialization mode\n# 1   Quiescent mode\n# 2   Recovery mode\n# 3   Backup mode\n# 4   Shutdown mode\n# 5   Online mode\n# 6   Abort mode\n# 7   User mode\n# 255     Off-Line mode",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "72343bd41f1b42b29e026da2274b9a48",
+                                        "expression": "last(/templ - Informix/zabifx[serverstatus,{#IFXSERVER}])=3",
+                                        "name": "trg - Informix DB {#IFXSERVER} - Backup mode (zabifx)",
+                                        "priority": "INFO",
+                                        "description": "Status differ 5 (online)  , database isn't available to users.\n\n# 0   Initialization mode\n# 1   Quiescent mode\n# 2   Recovery mode\n# 3   Backup mode\n# 4   Shutdown mode\n# 5   Online mode\n# 6   Abort mode\n# 7   User mode\n# 255     Off-Line mode",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "43d45be2874e4eaa9486c312218e34b5",
+                                        "expression": "last(/templ - Informix/zabifx[serverstatus,{#IFXSERVER}])=255",
+                                        "name": "trg - Informix DB {#IFXSERVER} - Down! (zabifx)",
+                                        "priority": "DISASTER",
+                                        "description": "Status differ 5 (online)  , database isn't available to users.\n\n# 0   Initialization mode\n# 1   Quiescent mode\n# 2   Recovery mode\n# 3   Backup mode\n# 4   Shutdown mode\n# 5   Online mode\n# 6   Abort mode\n# 7   User mode\n# 255     Off-Line mode",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "d585ee93bfae42d4acec512af9f42bac",
+                                        "expression": "last(/templ - Informix/zabifx[serverstatus,{#IFXSERVER}])=0",
+                                        "name": "trg - Informix DB {#IFXSERVER} - Initialization mode (zabifx)",
+                                        "priority": "AVERAGE",
+                                        "description": "Status differ 5 (online)  , database isn't available to users.\n\n# 0   Initialization mode\n# 1   Quiescent mode\n# 2   Recovery mode\n# 3   Backup mode\n# 4   Shutdown mode\n# 5   Online mode\n# 6   Abort mode\n# 7   User mode\n# 255     Off-Line mode",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "79550843a070464b8c2286b9be6b45f5",
+                                        "expression": "last(/templ - Informix/zabifx[serverstatus,{#IFXSERVER}])=1",
+                                        "name": "trg - Informix DB {#IFXSERVER} - Quiescent mode (zabifx)",
+                                        "priority": "HIGH",
+                                        "description": "Status differ 5 (online)  , database isn't available to users.\n\n# 0   Initialization mode\n# 1   Quiescent mode\n# 2   Recovery mode\n# 3   Backup mode\n# 4   Shutdown mode\n# 5   Online mode\n# 6   Abort mode\n# 7   User mode\n# 255     Off-Line mode",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "bcb1e2ebc37d413889bfa99a946e7b62",
+                                        "expression": "last(/templ - Informix/zabifx[serverstatus,{#IFXSERVER}])=2",
+                                        "name": "trg - Informix DB {#IFXSERVER} - Recovery mode (zabifx)",
+                                        "priority": "INFO",
+                                        "description": "Status differ 5 (online)  , database isn't available to users.\n\n# 0   Initialization mode\n# 1   Quiescent mode\n# 2   Recovery mode\n# 3   Backup mode\n# 4   Shutdown mode\n# 5   Online mode\n# 6   Abort mode\n# 7   User mode\n# 255     Off-Line mode",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "a296398d466742fa8d1b508816113408",
+                                        "expression": "last(/templ - Informix/zabifx[serverstatus,{#IFXSERVER}])=4",
+                                        "name": "trg - Informix DB {#IFXSERVER} - Shutdown mode (zabifx)",
+                                        "priority": "HIGH",
+                                        "description": "Status differ 5 (online)  , database isn't available to users.\n\n# 0   Initialization mode\n# 1   Quiescent mode\n# 2   Recovery mode\n# 3   Backup mode\n# 4   Shutdown mode\n# 5   Online mode\n# 6   Abort mode\n# 7   User mode\n# 255     Off-Line mode",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "004b4d0f59d940bd842d11ea8e4ffd9b",
+                                        "expression": "last(/templ - Informix/zabifx[serverstatus,{#IFXSERVER}])>7 and last(/templ - Informix/zabifx[serverstatus,{#IFXSERVER}])<>255",
+                                        "name": "trg - Informix DB {#IFXSERVER} - Unavailable (zabifx)",
+                                        "priority": "HIGH",
+                                        "description": "Status differ 5 (online)  , database isn't available to users.\n\n# 0   Initialization mode\n# 1   Quiescent mode\n# 2   Recovery mode\n# 3   Backup mode\n# 4   Shutdown mode\n# 5   Online mode\n# 6   Abort mode\n# 7   User mode\n# 255     Off-Line mode",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "ac999d60feb846339fd512f4b098090a",
+                                        "expression": "last(/templ - Informix/zabifx[serverstatus,{#IFXSERVER}])=7",
+                                        "name": "trg - Informix DB {#IFXSERVER} - User mode (zabifx)",
+                                        "priority": "HIGH",
+                                        "description": "Status differ 5 (online)  , database isn't available to users.\n\n# 0   Initialization mode\n# 1   Quiescent mode\n# 2   Recovery mode\n# 3   Backup mode\n# 4   Shutdown mode\n# 5   Online mode\n# 6   Abort mode\n# 7   User mode\n# 255     Off-Line mode",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "da2bb89548b049e08291efd71aec312e",
+                                "name": "Informix DB {#IFXSERVER} - # Sessions",
+                                "key": "zabifx[sessioncount,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "1w",
+                                "description": "# of User Sessions.\nExecuted by Zabbix Agent  \n+ UserParameter\n+ zabifx script",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "c1b41468e1d94f01a3c28e7263196aaa",
+                                "name": "Informix DB  {#IFXSERVER} - Shared Memory allowed - SHMTOTAL configuration",
+                                "key": "zabifx[shmtotal,{#IFXSERVER}]",
+                                "delay": "6h",
+                                "history": "30d",
+                                "units": "B",
+                                "description": "The maximum amount of shared memory allowed for the server.",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - Memory"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "235bc33fde42418c995557c6bb92a0d3",
+                                "name": "Informix DB {#IFXSERVER} - # System Threads",
+                                "key": "zabifx[systemthreads,{#IFXSERVER}]",
+                                "delay": "2m",
+                                "history": "1w",
+                                "description": "# of system Threads (onstat -g ath  minus sqlexec)\nExecuted by Zabbix Agent  \n+ UserParameter\n+ zabifx script",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "775efdef8fc64a46a6930678d37a0fd2",
+                                "name": "Informix DB {#IFXSERVER} - # Threads Ready",
+                                "key": "zabifx[threadread,{#IFXSERVER}]",
+                                "delay": "2m",
+                                "history": "1w",
+                                "description": "# of Threads Ready (onstat -g rea) to run into CPU\nExecuted by Zabbix Agent  \n+ UserParameter\n+ zabifx script",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "8f7cb9a90ba542a6a766cbec94262e6f",
+                                "name": "Informix DB {#IFXSERVER} - # Sessions top",
+                                "key": "zabifx[topsessioncount,{#IFXSERVER}]",
+                                "delay": "30m",
+                                "history": "2d",
+                                "description": "Max # of Active Sessions since the database was started.\n\nExecuted by Zabbix Agent  \n+ UserParameter\n+ zabifx script",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - sessions"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "ac3a11e5782c4f619754bdf7759f5495",
+                                "name": "Informix DB {#IFXSERVER} - # Threads",
+                                "key": "zabifx[totalthreads,{#IFXSERVER}]",
+                                "delay": "2m",
+                                "history": "1w",
+                                "description": "# of Threads (onstat -g ath) \nExecuted by Zabbix Agent  \n+ UserParameter\n+ zabifx script",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "f82303532fb24dcba496f3bf587f08f5",
+                                "name": "Informix DB {#IFXSERVER} - Uptime",
+                                "key": "zabifx[uptime,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "7d",
+                                "units": "s",
+                                "description": "Time the instance is UP.\nBased on \"onstat -\" header output\n\nExecuted by Zabbix Agent  \n+ UserParameter\n+ zabifx script",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "0612129371f044169a081bd43f0ee019",
+                                "name": "Informix DB {#IFXSERVER} - # Sessions in lock waits",
+                                "key": "zabifx[userlockwaiting,{#IFXSERVER}]",
+                                "delay": "2m",
+                                "history": "4d",
+                                "units": "sessions",
+                                "description": "# of User Sessions waiting for lock.\n\nExecuted by Zabbix Agent  \n+ UserParameter\n+ zabifx script",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - sessions"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "2aac1f5a39cc4a7b8cfae9b8616dacc0",
+                                        "expression": "last(/templ - Informix/zabifx[userlockwaiting,{#IFXSERVER}],#3)>0 and last(/templ - Informix/zabifx[userlockwaiting,{#IFXSERVER}],#2)>0 and last(/templ - Informix/zabifx[userlockwaiting,{#IFXSERVER}],#1)>0",
+                                        "name": "trg - Informix DB {#IFXSERVER} - Sessions in lock",
+                                        "status": "DISABLED",
+                                        "priority": "INFO",
+                                        "description": "Trigger alarm if occur to any session be was locked on the last three capture consecutive...\n----\nonstat -u | grep \"\\<L\"",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "trg - Informix DB {#IFXSERVER} - Sessions in lock",
+                                                "expression": "last(/templ - Informix/zabifx[userlockwaiting,{#IFXSERVER}],#5)>0 and last(/templ - Informix/zabifx[userlockwaiting,{#IFXSERVER}],#4)>0 and last(/templ - Informix/zabifx[userlockwaiting,{#IFXSERVER}],#3)>0 and last(/templ - Informix/zabifx[userlockwaiting,{#IFXSERVER}],#3)>0 and last(/templ - Informix/zabifx[userlockwaiting,{#IFXSERVER}],#2)>0 and last(/templ - Informix/zabifx[userlockwaiting,{#IFXSERVER}],#1)>0"
+                                            }
+                                        ],
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "61e11f622aad4451881ff5e25e23ad33",
+                                        "expression": "last(/templ - Informix/zabifx[userlockwaiting,{#IFXSERVER}],#5)>0 and last(/templ - Informix/zabifx[userlockwaiting,{#IFXSERVER}],#4)>0 and last(/templ - Informix/zabifx[userlockwaiting,{#IFXSERVER}],#3)>0 and last(/templ - Informix/zabifx[userlockwaiting,{#IFXSERVER}],#3)>0 and last(/templ - Informix/zabifx[userlockwaiting,{#IFXSERVER}],#2)>0 and last(/templ - Informix/zabifx[userlockwaiting,{#IFXSERVER}],#1)>0",
+                                        "name": "trg - Informix DB {#IFXSERVER} - Sessions in lock",
+                                        "priority": "WARNING",
+                                        "description": "Trigger alarm if occur to any session be was locked on the last five capture consecutive...\n----\nonstat -u | grep \"\\<L\"",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "a348fad0d49e47c0a8bfc3e64940a283",
+                                "name": "Informix DB {#IFXSERVER} - # Sessions in waits",
+                                "key": "zabifx[userwaiting,{#IFXSERVER}]",
+                                "delay": "2m",
+                                "history": "4d",
+                                "units": "sessions",
+                                "description": "# of User Sessions waiting for something what isn't lock or yield process.\n\nExecuted by Zabbix Agent  \n+ UserParameter\n+ zabifx script",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - sessions"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "47ddb59a36a44cfe945285f046c8f0ae",
+                                        "expression": "last(/templ - Informix/zabifx[userwaiting,{#IFXSERVER}],#5)>0 and last(/templ - Informix/zabifx[userwaiting,{#IFXSERVER}],#4)>0 and last(/templ - Informix/zabifx[userwaiting,{#IFXSERVER}],#3)>0 and last(/templ - Informix/zabifx[userwaiting,{#IFXSERVER}],#3)>0 and last(/templ - Informix/zabifx[userwaiting,{#IFXSERVER}],#2)>0 and last(/templ - Informix/zabifx[userwaiting,{#IFXSERVER}],#1)>0",
+                                        "name": "trg - Informix DB {#IFXSERVER} - Sessions in wait",
+                                        "priority": "INFO",
+                                        "description": "Trigger alarm if occur to any session be in wait (not locking) on the last five capture consecutive... (= 10 minutes)",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "Banco de dados",
+                                                "value": "informix"
+                                            },
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "dad98e456f9849ee8b377442e49f1204",
+                                "name": "Informix DB {#IFXSERVER} - Informix Version",
+                                "key": "zabifx[version,{#IFXSERVER}]",
+                                "delay": "6h",
+                                "history": "365d",
+                                "trends": "0",
+                                "value_type": "TEXT",
+                                "description": "Informix version",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "7fe31687279e4d3e8593eaa78f3e76a8",
+                                        "expression": "change(/templ - Informix/zabifx[version,{#IFXSERVER}])<>0",
+                                        "name": "trg - Informix version change",
+                                        "priority": "INFO",
+                                        "description": "$ onstat -",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "c24072da88874ddea4caf3132a97eb14",
+                                "name": "Informix DB {#IFXSERVER} - # VPs",
+                                "key": "zabifx[vps,{#IFXSERVER}]",
+                                "delay": "15m",
+                                "history": "1w",
+                                "description": "The current number of virtual processors.",
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - profile"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "963a7a20eb9447aeb43736b1afa312a5",
+                                "name": "Informix DB {#IFXSERVER} - VP ADM- Administrative",
+                                "key": "zabifx[vp_adm,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "s",
+                                "description": "CPU Total consumption of VP\n(summary of onstat -g glo)",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - VPs"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "b2d361bdcd114f3ba064ce03dfaa9418",
+                                "name": "Informix DB {#IFXSERVER} - VP AIO",
+                                "key": "zabifx[vp_aio,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "s",
+                                "description": "CPU Total consumption of VP\n(summary of onstat -g glo)",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - VPs"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "99cd4010db574b79a4d4bf48f5275dc1",
+                                "name": "Informix DB {#IFXSERVER} - VP BTS - Basic text search",
+                                "key": "zabifx[vp_bts,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "s",
+                                "description": "CPU Total consumption of VP\n(summary of onstat -g glo)",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - VPs"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "113c72e21b314d53bedb5ff83d5f0174",
+                                "name": "Informix DB {#IFXSERVER} - VP CPU",
+                                "key": "zabifx[vp_cpu,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "s",
+                                "description": "CPU Total consumption of VP\n(summary of onstat -g glo)",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - VPs"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "ff60e97d9e4a40a4adb616b55ed88d56",
+                                "name": "Informix DB {#IFXSERVER} - VP ENC - Encrypt",
+                                "key": "zabifx[vp_enc,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "s",
+                                "description": "CPU Total consumption of VP\n(summary of onstat -g glo)",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - VPs"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "8e7ccb68b6b740f6b0bc1728a485bb53",
+                                "name": "Informix DB {#IFXSERVER} - VP Encrypt - SSL",
+                                "key": "zabifx[vp_encrypt,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "s",
+                                "description": "CPU Total consumption of VP\n(summary of onstat -g glo)",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - VPs"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "768fe9ac16c7488299c5664660ef241c",
+                                "name": "Informix DB {#IFXSERVER} - VP FIFO",
+                                "key": "zabifx[vp_fifo,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "s",
+                                "description": "CPU Total consumption of VP\n(summary of onstat -g glo)",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - VPs"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "55f03e6ead254518b612cbf1b8d28190",
+                                "name": "Informix DB {#IFXSERVER} - VP XML",
+                                "key": "zabifx[vp_idsxmlvp,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "s",
+                                "description": "CPU Total consumption of VP\n(summary of onstat -g glo)",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - VPs"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "b2042f9546374950a8e4d508798a0705",
+                                "name": "Informix DB {#IFXSERVER} - VP LIO - Logical Log",
+                                "key": "zabifx[vp_lio,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "s",
+                                "description": "CPU Total consumption of VP\n(summary of onstat -g glo)",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - VPs"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "c6196e0b48504c1f91db1b70528f17ff",
+                                "name": "Informix DB {#IFXSERVER} - VP MSC - Miscellaneus",
+                                "key": "zabifx[vp_msc,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "s",
+                                "description": "CPU Total consumption of VP\n(summary of onstat -g glo)",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - VPs"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "04dd0dfbfeb7473e949e0d4bba172fd9",
+                                "name": "Informix DB {#IFXSERVER} - VP PIO - Physical Log",
+                                "key": "zabifx[vp_pio,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "s",
+                                "description": "CPU Total consumption of VP\n(summary of onstat -g glo)",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - VPs"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "b0a161b2c5f24c958b9d26a89cd312f2",
+                                "name": "Informix DB {#IFXSERVER} - VP SOC- Socket",
+                                "key": "zabifx[vp_soc,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "s",
+                                "description": "CPU Total consumption of VP\n(summary of onstat -g glo)",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - VPs"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "4e2471c7496a4b60b9e35ddd3dec4b47",
+                                "name": "Informix DB {#IFXSERVER} - VP SSL",
+                                "key": "zabifx[vp_ssl,{#IFXSERVER}]",
+                                "delay": "3m",
+                                "history": "4d",
+                                "value_type": "FLOAT",
+                                "units": "s",
+                                "description": "CPU Total consumption of VP\n(summary of onstat -g glo)",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "request_method": "POST",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - VPs"
+                                    }
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [
+                            {
+                                "uuid": "e90764b3b82b4df9ac5865c036765423",
+                                "expression": "( (last(/templ - Informix/zabifx[totalthreads,{#IFXSERVER}]) - last(/templ - Informix/zabifx[systemthreads,{#IFXSERVER}])) / last(/templ - Informix/zabifx[sessioncount,{#IFXSERVER}])) > 3 and ( (last(/templ - Informix/zabifx[totalthreads,{#IFXSERVER}],#2) - last(/templ - Informix/zabifx[systemthreads,{#IFXSERVER}],#2)) / last(/templ - Informix/zabifx[sessioncount,{#IFXSERVER}],#2)) > 3 and ( (last(/templ - Informix/zabifx[totalthreads,{#IFXSERVER}],#3) - last(/templ - Informix/zabifx[systemthreads,{#IFXSERVER}],#3)) / last(/templ - Informix/zabifx[sessioncount,{#IFXSERVER}],#3)) > 3",
+                                "name": "trg - Informix DB {#IFXSERVER} - # threads high",
+                                "priority": "WARNING",
+                                "description": "Alarm if the number of users threads is three times of # of sessions .\n(there is no sense this occur at mostly of environments)",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "Banco de dados",
+                                        "value": "informix"
+                                    },
+                                    {
+                                        "tag": "Servi\u00e7o",
+                                        "value": "Banco de dados"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "d95bdc257dae4622a6814620c69800d5",
+                                "expression": "(last(/templ - Informix/zabifx[shmtotal,{#IFXSERVER}]) > 0)\n and (\n  (last(/templ - Informix/zabifx[shmtotal,{#IFXSERVER}])* 0.9) <= \n  last(/templ - Informix/zabifx[memtotaloc,{#IFXSERVER}]) \n)",
+                                "name": "trg - Informix DB {#IFXSERVER} - 10% of the memory allowed free",
+                                "priority": "WARNING",
+                                "description": "Alarm if the amount of memory allocated into the OS become less of 10% close of the SHMTOTAL set.",
+                                "manual_close": "YES",
+                                "dependencies": [
+                                    {
+                                        "name": "trg - Informix DB {#IFXSERVER} - memory allocated is close of 100% of memory allowed",
+                                        "expression": "(last(/templ - Informix/zabifx[shmtotal,{#IFXSERVER}]) > 0)\n and (\n  (last(/templ - Informix/zabifx[shmtotal,{#IFXSERVER}])* 0.99) <= \n  last(/templ - Informix/zabifx[memtotaloc,{#IFXSERVER}]) \n)"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Banco de dados",
+                                        "value": "informix"
+                                    },
+                                    {
+                                        "tag": "Servi\u00e7o",
+                                        "value": "Banco de dados"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "83263da9383d4b6cb9e2aff37bd547a1",
+                                "expression": "(last(/templ - Informix/zabifx[shmtotal,{#IFXSERVER}]) > 0)\n and (\n  (last(/templ - Informix/zabifx[shmtotal,{#IFXSERVER}])* 0.99) <= \n  last(/templ - Informix/zabifx[memtotaloc,{#IFXSERVER}]) \n)",
+                                "name": "trg - Informix DB {#IFXSERVER} - memory allocated is close of 100% of memory allowed",
+                                "priority": "HIGH",
+                                "description": "Alarm if the amount of memory allocated into the OS become close of 100% of the SHMTOTAL set.",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "Banco de dados",
+                                        "value": "informix"
+                                    },
+                                    {
+                                        "tag": "Servi\u00e7o",
+                                        "value": "Banco de dados"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "9d0e5e0d499e4993acedb7e8ba0261e8",
+                                "expression": "last(/templ - Informix/zabifx[rssservers,{#IFXSERVER}])>0 and last(/templ - Informix/zabifx[rssconnactive,{#IFXSERVER}],#1)=0 and last(/templ - Informix/zabifx[rssconnactive,{#IFXSERVER}],#2)=0",
+                                "name": "trg - Informix DB {#IFXSERVER} - RSS connection",
+                                "priority": "WARNING",
+                                "description": "trigger the alarm if exists any RSS server configured and the last two checks there is no connection;",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "Banco de dados",
+                                        "value": "informix"
+                                    },
+                                    {
+                                        "tag": "Servi\u00e7o",
+                                        "value": "Banco de dados"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "ca21312f5b454f2f902b8735d1c5ebaa",
+                                "expression": "last(/templ - Informix/zabifx[rssservers,{#IFXSERVER}])>0 and last(/templ - Informix/zabifx[rssbacklog,{#IFXSERVER}],#1) > last(/templ - Informix/zabifx[rssbacklog,{#IFXSERVER}],#2) and last(/templ - Informix/zabifx[rssbacklog,{#IFXSERVER}],#2) > last(/templ - Informix/zabifx[rssbacklog,{#IFXSERVER}],#3)",
+                                "name": "trg - Informix DB {#IFXSERVER} - RSS sync",
+                                "priority": "INFO",
+                                "description": "trigger the alarm if exists any RSS server configured and the last three backlog capture is growing (~ secondary isn't applying the log for some reason)",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "Banco de dados",
+                                        "value": "informix"
+                                    },
+                                    {
+                                        "tag": "Servi\u00e7o",
+                                        "value": "Banco de dados"
+                                    }
+                                ]
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "6688c2e12038471cb4c95e0e517d27b5",
+                                "name": "ifxDB {#IFXSERVER} - General",
+                                "ymin_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "C800C8",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[sessioncount,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "color": "00C8C8",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[activesessioncount,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "2",
+                                        "drawtype": "BOLD_LINE",
+                                        "color": "A5D6A7",
+                                        "yaxisside": "RIGHT",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[uptime,{#IFXSERVER}]"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "e38d0e0eaaae4f3eae4feef816625283",
+                                "name": "ifxDB {#IFXSERVER} - Logical Logs",
+                                "ymin_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "FILLED_REGION",
+                                        "color": "969696",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[llogcurrent,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "drawtype": "BOLD_LINE",
+                                        "color": "EE0000",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[llogwithoutbkp,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "2",
+                                        "drawtype": "BOLD_LINE",
+                                        "color": "969600",
+                                        "yaxisside": "RIGHT",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[llogwithoutbkpperc,{#IFXSERVER}]"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "be4caf8abeee46b5bf2efd9e9f605f97",
+                                "name": "ifxDB {#IFXSERVER} - Memory",
+                                "show_triggers": "NO",
+                                "ymin_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "7EC25C",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[memtotaloc,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "color": "3165D5",
+                                        "yaxisside": "RIGHT",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[membuffree,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "2",
+                                        "color": "79A277",
+                                        "yaxisside": "RIGHT",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[memextfree,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "3",
+                                        "color": "AA73DE",
+                                        "yaxisside": "RIGHT",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[memresfree,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "4",
+                                        "color": "FD5434",
+                                        "yaxisside": "RIGHT",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[memtotfree,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "5",
+                                        "color": "F21C3E",
+                                        "yaxisside": "RIGHT",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[memvirfree,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "6",
+                                        "color": "87AC4D",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[membufused,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "7",
+                                        "color": "E89DF4",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[memextused,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "8",
+                                        "color": "199C0D",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[memresused,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "9",
+                                        "color": "F63100",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[memtotused,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "10",
+                                        "color": "2774A4",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[memvirused,{#IFXSERVER}]"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "6978d94d1185439ba67fa0e7ce5b113c",
+                                "name": "ifxDB {#IFXSERVER} - Network",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "BOLD_LINE",
+                                        "color": "00C800",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[network_reads,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "drawtype": "BOLD_LINE",
+                                        "color": "0000C8",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[network_writes,{#IFXSERVER}]"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "eececc1e1ae346d4a087d9a3068e0d74",
+                                "name": "ifxDB {#IFXSERVER} - RSS",
+                                "ymin_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "sortorder": "1",
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "FF33FF",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[rssbacklog,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "2",
+                                        "drawtype": "BOLD_LINE",
+                                        "color": "0000C8",
+                                        "yaxisside": "RIGHT",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[rssconnactive,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "3",
+                                        "color": "00DD00",
+                                        "yaxisside": "RIGHT",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[rssservers,{#IFXSERVER}]"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "70f3d89ca7ba46428d04af4e8133a03f",
+                                "name": "ifxDB {#IFXSERVER} - Sessions",
+                                "show_triggers": "NO",
+                                "ymin_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "BOLD_LINE",
+                                        "color": "770077",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[topsessioncount,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "3333FF",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[sessioncount,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "2",
+                                        "drawtype": "BOLD_LINE",
+                                        "color": "00DD00",
+                                        "yaxisside": "RIGHT",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[activesessioncount,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "3",
+                                        "drawtype": "BOLD_LINE",
+                                        "color": "FF3333",
+                                        "yaxisside": "RIGHT",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[userlockwaiting,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "4",
+                                        "drawtype": "BOLD_LINE",
+                                        "color": "990000",
+                                        "yaxisside": "RIGHT",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[userwaiting,{#IFXSERVER}]"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "5636d427f1cb4e6a80cc94ecae3aa302",
+                                "name": "ifxDB {#IFXSERVER} - Throughtput",
+                                "ymin_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "color": "00EE00",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[activesessioncount,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "color": "C800C8",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[userlockwaiting,{#IFXSERVER}]"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "a3d44129c6b04084992ab62850dd5c14",
+                                "name": "ifxDB {#IFXSERVER} - VPs",
+                                "show_triggers": "NO",
+                                "ymin_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "color": "C800C8",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[vp_adm,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "color": "00C8C8",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[vp_aio,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "2",
+                                        "color": "C8C800",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[vp_bts,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "3",
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "C8C8C8",
+                                        "yaxisside": "RIGHT",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[vp_cpu,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "4",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[vp_enc,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "5",
+                                        "color": "960000",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[vp_encrypt,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "6",
+                                        "color": "000096",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[vp_fifo,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "7",
+                                        "color": "960096",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[vp_lio,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "8",
+                                        "color": "009696",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[vp_msc,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "9",
+                                        "color": "969600",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[vp_pio,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "10",
+                                        "color": "969696",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[vp_soc,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "11",
+                                        "color": "00FF00",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[vp_ssl,{#IFXSERVER}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "12",
+                                        "color": "FF0000",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[vp_idsxmlvp,{#IFXSERVER}]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "request_method": "POST"
+                    },
+                    {
+                        "uuid": "b768ded74c0c4527b65ff16ee7af2ae3",
+                        "name": "Informix sbspaces",
+                        "key": "zabifx[sbspaces,-]",
+                        "delay": "2h",
+                        "description": "Lista todos os sbspaces para instancia encontrada no servidor.\nO script zabifx utiliza o comando \"onstat -g dis\" + \"onstat -d\" para identificar os sbspaces.\nEla gera duas macros : {#IFXSERVER} , {#IFXDBSPACE}\n\n{                                       \n   \"data\":[                             \n      {                                 \n         \"{#IFXSERVER}\":\"ifxdesenv2\",   \n         \"{#IFXDBSPACE}\":\"rootdbs\"      \n      },                                \n      {                                 \n         \"{#IFXSERVER}\":\"ifxdesenv2\",   \n         \"{#IFXDBSPACE}\":\"llogdbs\"      \n      },                                \n      {                                 \n         \"{#IFXSERVER}\":\"ifxdesenv2\",   \n         \"{#IFXDBSPACE}\":\"plogdbs\"      \n      },                                \n      {                                 \n         \"{#IFXSERVER}\":\"ifxdesenv1\",   \n         \"{#IFXDBSPACE}\":\"rootdbs\"      \n      },                                \n      {                                 \n         \"{#IFXSERVER}\":\"ifxdesenv1\",   \n         \"{#IFXDBSPACE}\":\"softeldat1dbs\"\n      }                                 \n   ]                                    \n}",
+                        "item_prototypes": [
+                            {
+                                "uuid": "0a47521694c74f42a14664bbc2b7f7f7",
+                                "name": "{#IFXSERVER} / {#IFXDBSPACE} - Flags",
+                                "type": "ZABBIX_ACTIVE",
+                                "key": "zabifx[sbspaceflag,{#IFXSERVER},{#IFXDBSPACE}]",
+                                "delay": "10m",
+                                "history": "15d",
+                                "trends": "0",
+                                "value_type": "TEXT",
+                                "description": "Get dbspace char Flags  where :\nPosition 1:\n  M Mirrored\n  N Not mirrored\nPosition 2:\n  X Newly mirrored\n  P Physically recovered, waiting for logical recovery\n  L Being logically recovered\n  R Being recovered\n  D Down\nPosition 3:\n  B Blobspace\n  P Plogspace\n  S Sbspace\n  T Temporary dbspace\n  U Temporary sbspace\n  W Temporary dbspace on primary server (This flag is shown on SD secondary servers only.)\nPosition 4:\n  B The dbspace can have large chunks that are greater than 2 GB.\nPosition 5:\n  A The dbspace is auto-expandable because the SP_AUTOEXPAND configuration parameter is enabled and the dbspace is configured with a create size or extend size that is not zero.\nPosition 6:\n  E The storage space is encrypted.",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - sbspaces"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "d04c84fae8a1458b83b8d6e703ce184b",
+                                "name": "{#IFXSERVER} / {#IFXDBSPACE} - Free",
+                                "key": "zabifx[sbspacefree,{#IFXSERVER},{#IFXDBSPACE}]",
+                                "delay": "1h",
+                                "history": "32d",
+                                "value_type": "FLOAT",
+                                "units": "MB",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - sbspaces"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "0695ce1b5d504d4788b7342df42a21c7",
+                                        "expression": "(last(/templ - Informix/zabifx[sbspacefree,{#IFXSERVER},{#IFXDBSPACE}]) < {$MAX_FREE_ALERT_MB}) and \n((last(/templ - Informix/zabifx[sbspacefree,{#IFXSERVER},{#IFXDBSPACE}]) * 100) / last(/templ - Informix/zabifx[sbspacefree,{#IFXSERVER},{#IFXDBSPACE}])) < 5",
+                                        "name": "Informix DB - {#IFXSERVER} / {#IFXDBSPACE} - Less than {$MAX_FREE_ALERT_MB} MB or 5% free - {ITEM.VALUE} MBytes",
+                                        "priority": "AVERAGE",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "Informix DB - {#IFXSERVER} / {#IFXDBSPACE} - FULL",
+                                                "expression": "((last(/templ - Informix/zabifx[sbspacefree,{#IFXSERVER},{#IFXDBSPACE}]) * 100) / last(/templ - Informix/zabifx[sbspacesize,{#IFXSERVER},{#IFXDBSPACE}])) < 1"
+                                            }
+                                        ],
+                                        "tags": [
+                                            {
+                                                "tag": "Servi\u00e7o",
+                                                "value": "Banco de dados"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "90ded3528acc4a239e531137f969973e",
+                                "name": "{#IFXSERVER} / {#IFXDBSPACE} - Items",
+                                "key": "zabifx[sbspaceitems,{#IFXSERVER},{#IFXDBSPACE}]",
+                                "delay": "1h",
+                                "history": "32d",
+                                "value_type": "FLOAT",
+                                "units": "items",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - sbspaces"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "1a920668229841fe97b2aad45b9efc2d",
+                                "name": "{#IFXSERVER} / {#IFXDBSPACE} - Size",
+                                "key": "zabifx[sbspacesize,{#IFXSERVER},{#IFXDBSPACE}]",
+                                "delay": "3h",
+                                "history": "32d",
+                                "value_type": "FLOAT",
+                                "units": "MB",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Informix Database - sbspaces"
+                                    }
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [
+                            {
+                                "uuid": "dae5c70e62c24481b6fda520bba8aaa9",
+                                "expression": "((last(/templ - Informix/zabifx[sbspacefree,{#IFXSERVER},{#IFXDBSPACE}]) * 100) / last(/templ - Informix/zabifx[sbspacesize,{#IFXSERVER},{#IFXDBSPACE}])) < 1",
+                                "name": "Informix DB - {#IFXSERVER} / {#IFXDBSPACE} - FULL",
+                                "priority": "HIGH",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "Servi\u00e7o",
+                                        "value": "Banco de dados"
+                                    }
+                                ]
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "9d5a4d296e2a49699df9c9f636bde329",
+                                "name": "grp - {#IFXSERVER} / {#IFXDBSPACE}",
+                                "ymin_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "FILLED_REGION",
+                                        "color": "2774A4",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[sbspacesize,{#IFXSERVER},{#IFXDBSPACE}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "drawtype": "FILLED_REGION",
+                                        "color": "1A7C11",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[sbspacefree,{#IFXSERVER},{#IFXDBSPACE}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "2",
+                                        "color": "F63100",
+                                        "yaxisside": "RIGHT",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "templ - Informix",
+                                            "key": "zabifx[sbspaceitems,{#IFXSERVER},{#IFXDBSPACE}]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$MAX_FREE_ALERT_GB}",
+                        "value": "5"
+                    },
+                    {
+                        "macro": "{$MAX_FREE_ALERT_KB}",
+                        "value": "5000000"
+                    },
+                    {
+                        "macro": "{$MAX_FREE_ALERT_MB}",
+                        "value": "5000"
+                    }
+                ],
+                "valuemaps": [
+                    {
+                        "uuid": "7de72af5ecf848c8827cd7002490eee0",
+                        "name": "Informix - Database status",
+                        "mappings": [
+                            {
+                                "value": "0",
+                                "newvalue": "Initialization mode"
+                            },
+                            {
+                                "value": "1",
+                                "newvalue": "Quiescent mode"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "Recovery mode"
+                            },
+                            {
+                                "value": "3",
+                                "newvalue": "Backup mode"
+                            },
+                            {
+                                "value": "4",
+                                "newvalue": "Shutdown mode"
+                            },
+                            {
+                                "value": "5",
+                                "newvalue": "Online mode"
+                            },
+                            {
+                                "value": "6",
+                                "newvalue": "Abort mode"
+                            },
+                            {
+                                "value": "7",
+                                "newvalue": "User mode"
+                            },
+                            {
+                                "value": "255",
+                                "newvalue": "Off-Line mode"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "ba801b26b0cd47a091aa23d8b8336615",
+                        "name": "Yes (1) / No (0)",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "yes"
+                            },
+                            {
+                                "value": "0",
+                                "newvalue": "no"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,7 +1,7 @@
 ZABIFX 
 ======
 
-2019-06-27  
+2022-11-25  
 by Cesar Inacio Martins - informix at imartins.com.br
 
 https://github.com/ceinmart/zabifx  
@@ -11,7 +11,7 @@ https://share.zabbix.com/databases/zabifx-sh-informix-database
 About this Template_Informix
 
     This template was created , tested and used successfully
-    on Zabbix 4.2.1 (rpm opensuse 15.0 ) monitoring multiple 
+    on Zabbix 6.2.0 (rpm opensuse 15.4 ) monitoring multiple 
     Informix v12.10 FC12 running over Red Hat 7.4 .
    
     They objective was monitor Informix instances.
