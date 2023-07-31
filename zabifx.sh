@@ -552,8 +552,8 @@ _param() {
                         ##sb=$2SUBSEP$4 ; 
                         sb=$2 
                         getline ; getline ; 
-                        sb_size[sb]=+($4*vPg)/vV ; 
-                        sb_free[sb]=+($7*vPg)/vV ; 
+                        sb_size[sb]+=($4*vPg)/vV ; 
+                        sb_free[sb]+=($7*vPg)/vV ; 
                       } 
                       END { 
                         if (vOpcao ~ "sbspacesize") printf "%-10.2f\n" , sb_size[sb]
