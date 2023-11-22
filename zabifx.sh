@@ -471,7 +471,7 @@ _param() {
                   #  vDbs   : Nome do DbSpace
                   #  echo $vnDbs $vPgSize $vDbs
                   _onstat "-d" | $AWK -v FS='\n' -v RS='' '/^Chunks/' | \
-                    $AWK -v vOpcao=${vParam1} -v vnDbs=${vDBS[0]} -v vDbs="${vDBS[2]}" -v vV="m" -v vPg=${vDBS[1]} '
+                    $AWK -v vOpcao=${vParam1} -v vnDbs=${vDBS[0]} -v vDbs="${vDBS[2]}" -v vV="b" -v vPg=${vDBS[1]} '
                     BEGIN { 
                             if (vV == "b") vV=1;
                             if (vV == "k") vV=1024;
@@ -540,7 +540,7 @@ _param() {
                     _onstat "-g smb e " | grep -c "\[${vDBS[0]},"  
                   else
                     _onstat "-g smb c " |\
-                    $AWK -v vOpcao=${vParam1} -v vnDbs=${vDBS[0]} -v vDbs="${vDBS[2]}" -v vV="m" -v vPg=${vDBS[1]} '
+                    $AWK -v vOpcao=${vParam1} -v vnDbs=${vDBS[0]} -v vDbs="${vDBS[2]}" -v vV="b" -v vPg=${vDBS[1]} '
                       BEGIN { 
                               if (vV == "b") vV=1;
                               if (vV == "k") vV=1024;
@@ -566,7 +566,7 @@ _param() {
                  fi 
                  ;;
 
-    # Return memory free
+    # Return memory free in bytes
     mem*free) printf "${vParam1}|" ; 
              vClass=""
              case ${vParam1} in 
@@ -584,7 +584,7 @@ _param() {
                echo "ZBX_NOTSUPPORTED"
              fi
              ;;
-    # Return memory used
+    # Return memory used in bytes
     mem*used) printf "${vParam1}|" ; 
              vClass=""
              case ${vParam1} in 
@@ -602,7 +602,7 @@ _param() {
                echo "ZBX_NOTSUPPORTED"
              fi
              ;;
-    # Return total memory allocated
+    # Return total memory allocated in bytes
     memtotaloc) printf "${vParam1}|" ; 
              value=$( _onstat '-g seg' | awk '/^Total:/ { print $4}')
              if [ ! -z "$value" ] ; then 
