@@ -43,7 +43,7 @@ source  /etc/zabbix/env.ifx.sh
   ONSTAT=$INFORMIXDIR/bin/onstat 
   GREP=grep
   # POSIXLY_CORRECT : to AWK parse equal on all OS the regular expressions... (on Linux this can be disabled)
-  export POSIXLY_CORRECT=1 
+  [ $(uname) != "Linux" ] && export POSIXLY_CORRECT=1 
   AWK=awk 
   SED=sed
   TR=tr
@@ -53,9 +53,6 @@ source  /etc/zabbix/env.ifx.sh
 #
 # This is for AIX, where it is part of the RPM coreutils installed manually.
   [ -x /usr/linux/bin/date ] && DATE=/usr/linux/bin/date
-
-
-
 
 ###############################################
 #
@@ -213,10 +210,10 @@ _param() {
                echo "ZBX_NOTSUPPORTED"
              fi
              ;;
-    # DBSPACE DISCOVERY
-    # This is a special threatment, because this parameter should be used to discovery the dbspaces of each instances in this machine
+    # DBSPACE DISCOVERY 
+    # This is a special threatment, because this parameter should be used to discovery the dbspaces of each instances in this machine 
     # 
-    # {
+    # { 
     #    "data":[
     #       {
     #          "{#IFXSERVER}":"ifxdesenv2",
@@ -243,9 +240,25 @@ _param() {
     dbspaces|sbspaces)
              echo "${vParam1}|{\"data\":["
              # Execute for each instance
+             # Pega configuracoes basicas de cada instancia e coloca em um array.
+             local i=0
+             declare -a vIFX_ARR
+             vIFX_ARR=()
+             while read linha 
+             do
+               vIFX_ARR[$i]="$linha"
+               i=$((i+1))
+             done < <(onstat -g dis | awk -F":" ' $1 ~ /Server *$/ {x=1} $1 ~ /Server *$|INFORMIXDIR|ONCONFIG|SQLHOSTS/ { gsub(/ /,"") ; gsub(/Server/,"INFORMIXSERVER",$1) ; printf "%s=%s  ",$1,$2 }  /^ *$/ && x==1{ print ""; x=0} '  )
              {
-             for INFORMIXSERVER in $(onstat -g dis | $AWK '/^Server *:/  { print $NF}')
+             for i in ${!vIFX_ARR[@]}
              do 
+               export ${vIFX_ARR[$i]} 
+               #export INFORMIXSERVER=${vIFX[INFORMIXSERVER]}
+               #export INFORMIXDIR=${vIFX[INFORMIXDIR]}
+               #export SQLHOSTS=${vIFX[SQLHOSTS]}
+               #export ONCONFIG=${vIFX[ONCONFIG]}
+               PATH=$(echo "$PATH" | tr ":" "\n" | grep -v informix | tr "\n" ":")
+               export PATH=$INFORMIXDIR/bin:$PATH
                # Force update the status of each instance.
                _onstat_status
                _onstat "-d" | \
@@ -659,7 +672,6 @@ _param() {
 } ##### _param
 ###
 ##############################################
-
 if [ "$vOption" = "all" ] ; then 
  for x in instance serverstatus sessioncount activesessioncount topsessioncount llogcurrent llogwithoutbkp llogwithoutbkpperc physize rssservers rssbacklog rssconnactive version checkpoint_inprogress checkpoints checkpoint_waits deadlocks lruwrites fgwrites uptime threadread llogautobkp systemthreads totalthreads vps vp_cpu vp_aio vp_lio vp_pio vp_adm vp_soc vp_msc vp_ssl vp_fifo vp_enc vp_idsxmlvp vp_bts memvirfree memresfree memextfree membuffree memtotfree memvirused memresused memextused membufused memtotused memtotaloc shmtotal msgpath network_accepted network_rejected network_reads network_writes buffer_waits buffer_flushes latches_waits
   do 
